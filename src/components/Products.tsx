@@ -2,6 +2,14 @@ import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product3 from "@/assets/product-3.jpg";
 import product4 from "@/assets/product-4.jpg";
+import product5 from "@/assets/product-5.jpg";
+import product6 from "@/assets/product-6.jpg";
+import product7 from "@/assets/product-7.jpg";
+import product8 from "@/assets/product-8.jpg";
+import product9 from "@/assets/product-9.jpg";
+import product10 from "@/assets/product-10.jpg";
+import product11 from "@/assets/product-11.jpg";
+import product12 from "@/assets/product-12.jpg";
 
 const products = [
   {
@@ -27,6 +35,54 @@ const products = [
     name: "ライフスタイル雑貨",
     price: "¥3,800",
     image: product4,
+  },
+  {
+    id: 5,
+    name: "レザーウォレット",
+    price: "¥5,200",
+    image: product5,
+  },
+  {
+    id: 6,
+    name: "竹製キッチン用品",
+    price: "¥2,900",
+    image: product6,
+  },
+  {
+    id: 7,
+    name: "陶器茶器セット",
+    price: "¥6,500",
+    image: product7,
+  },
+  {
+    id: 8,
+    name: "オーガニックトートバッグ",
+    price: "¥3,200",
+    image: product8,
+  },
+  {
+    id: 9,
+    name: "プレミアム文具セット",
+    price: "¥4,800",
+    image: product9,
+  },
+  {
+    id: 10,
+    name: "木製インテリア雑貨",
+    price: "¥4,500",
+    image: product10,
+  },
+  {
+    id: 11,
+    name: "シルクスカーフ＆ジュエリー",
+    price: "¥7,200",
+    image: product11,
+  },
+  {
+    id: 12,
+    name: "アロマセラピーセット",
+    price: "¥5,800",
+    image: product12,
   },
 ];
 
