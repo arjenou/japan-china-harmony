@@ -8,46 +8,50 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 20% 15%;
+    /* Japanese aesthetic - soft, natural colors */
+    --background: 30 20% 98%;
+    --foreground: 215 25% 27%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --card-foreground: 215 25% 27%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 15%;
+    --popover-foreground: 215 25% 27%;
 
-    --primary: 225 73% 23%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 225 73% 35%;
+    /* Deep indigo with warmth */
+    --primary: 220 40% 35%;
+    --primary-foreground: 30 35% 95%;
+    --primary-glow: 220 35% 45%;
 
-    --secondary: 210 20% 95%;
-    --secondary-foreground: 220 20% 15%;
+    /* Soft warm grey */
+    --secondary: 30 15% 92%;
+    --secondary-foreground: 215 25% 27%;
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 215 15% 50%;
 
-    --accent: 38 90% 50%;
-    --accent-foreground: 0 0% 100%;
-    --accent-glow: 38 100% 60%;
+    /* Warm terracotta accent */
+    --accent: 15 60% 55%;
+    --accent-foreground: 30 35% 98%;
+    --accent-glow: 15 65% 60%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 225 73% 23%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 220 40% 35%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(225 73% 23%), hsl(225 73% 35%));
-    --gradient-accent: linear-gradient(135deg, hsl(38 90% 50%), hsl(38 100% 60%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
-    --shadow-elegant: 0 10px 40px -10px hsl(225 73% 23% / 0.15);
-    --shadow-glow: 0 0 40px hsl(225 73% 35% / 0.2);
-    --shadow-card: 0 4px 20px hsl(220 15% 50% / 0.08);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Japanese-inspired design tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(220 40% 35%) 0%, hsl(220 35% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(15 60% 55%) 0%, hsl(25 65% 60%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(30 35% 98%) 0%, hsl(30 25% 96%) 100%);
+    --shadow-elegant: 0 8px 32px -8px hsl(220 40% 25% / 0.12);
+    --shadow-glow: 0 4px 24px hsl(15 60% 55% / 0.15);
+    --shadow-card: 0 2px 16px hsl(220 20% 50% / 0.06);
+    --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -115,9 +119,17 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "kern" 1;
+    font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: "kern" 1, "palt" 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: 0.02em;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 600;
+    letter-spacing: 0.03em;
   }
 
   html {
