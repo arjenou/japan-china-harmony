@@ -72,10 +72,10 @@ const Factories = () => {
                 )}
                 
                 {factory.capacity && (
-                  <div className="flex items-center gap-2">
-                    <Cog className="w-4 h-4 text-primary" />
-                    <span className="font-semibold text-foreground">生産能力：</span>
-                    <span>{factory.capacity}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Cog className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="font-semibold text-foreground whitespace-nowrap">生産能力：</span>
+                    <span className="flex-1">{factory.capacity}</span>
                   </div>
                 )}
               </div>
