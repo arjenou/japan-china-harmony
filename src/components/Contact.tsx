@@ -35,8 +35,8 @@ const Contact = () => {
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Contact Form */}
+        <div className="space-y-12 max-w-6xl mx-auto">
+          {/* Contact Form Container */}
           <div className="bg-card p-8 rounded-xl shadow-card border border-border">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -105,8 +105,9 @@ const Contact = () => {
             </form>
           </div>
           
-          {/* Contact Info */}
-          <div className="space-y-8">
+          {/* Company Info and Map Container */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Contact Info */}
             <div className="bg-card p-8 rounded-xl shadow-card border border-border">
               <h3 className="text-2xl font-bold mb-6 text-foreground">会社情報</h3>
               
@@ -146,7 +147,7 @@ const Contact = () => {
               </div>
             </div>
             
-            {/* Map placeholder */}
+            {/* Map */}
             <div className="bg-card p-4 rounded-xl shadow-card border border-border">
               <div className="aspect-video bg-secondary/30 rounded-lg flex items-center justify-center">
                 <p className="text-muted-foreground">地図表示エリア</p>
