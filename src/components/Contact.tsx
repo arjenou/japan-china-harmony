@@ -35,78 +35,80 @@ const Contact = () => {
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         
-        <div className="space-y-12 max-w-6xl mx-auto">
+        <div className="space-y-12 mx-auto">
           {/* Contact Form Container */}
-          <div className="bg-card p-8 rounded-xl shadow-card border border-border">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-semibold mb-2 text-foreground">
-                  お名前 *
-                </label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold mb-2 text-foreground">
-                  メールアドレス *
-                </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="company" className="block text-sm font-semibold mb-2 text-foreground">
-                  会社名
-                </label>
-                <Input
-                  id="company"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-semibold mb-2 text-foreground">
-                  お問い合わせ内容 *
-                </label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={6}
-                  className="w-full"
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full bg-primary hover:bg-primary-glow text-primary-foreground shadow-glow transition-smooth"
-              >
-                送信する
-              </Button>
-            </form>
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-card p-8 rounded-xl shadow-card border border-border">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-semibold mb-2 text-foreground">
+                    お名前 *
+                  </label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold mb-2 text-foreground">
+                    メールアドレス *
+                  </label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="company" className="block text-sm font-semibold mb-2 text-foreground">
+                    会社名
+                  </label>
+                  <Input
+                    id="company"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="message" className="block text-sm font-semibold mb-2 text-foreground">
+                    お問い合わせ内容 *
+                  </label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    rows={6}
+                    className="w-full"
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-primary hover:bg-primary-glow text-primary-foreground shadow-glow transition-smooth"
+                >
+                  送信する
+                </Button>
+              </form>
+            </div>
           </div>
           
           {/* Company Info and Map Container */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Contact Info */}
             <div className="bg-card p-8 rounded-xl shadow-card border border-border">
               <h3 className="text-2xl font-bold mb-6 text-foreground">会社情報</h3>
