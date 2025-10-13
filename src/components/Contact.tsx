@@ -121,8 +121,10 @@ const Contact = () => {
                   <div>
                     <p className="font-semibold text-foreground mb-1">上海英物国際貿易有限会社</p>
                     <p className="text-muted-foreground">
-                      〒200000<br />
-                      中国上海市
+                      Office I, 15/F, Huamin Hanjun Tower,<br />
+                      726 Yan'an West Road, Changning District,<br />
+                      Shanghai, China<br />
+                      〒200050
                     </p>
                   </div>
                 </div>
@@ -133,7 +135,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">電話</p>
-                    <p className="text-muted-foreground">+86-21-XXXX-XXXX</p>
+                    <p className="text-muted-foreground">013661548592</p>
                   </div>
                 </div>
                 
