@@ -13,7 +13,7 @@ const factories = [
     name: "安徽工場",
     location: "拠点数：2か所",
     area: "5,000㎡",
-    capacity: "高周波ウェルダー溶着、超音波ミシン溶着対応",
+    capacity: "高周波ウェルダー溶着\n超音波ミシン溶着対応",
   },
 ];
 
@@ -72,10 +72,10 @@ const Factories = () => {
                 )}
                 
                 {factory.capacity && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Cog className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="flex items-start gap-2">
+                    <Cog className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
                     <span className="font-semibold text-foreground whitespace-nowrap">生産能力：</span>
-                    <span className="flex-1">{factory.capacity}</span>
+                    <span className="whitespace-pre-line">{factory.capacity}</span>
                   </div>
                 )}
               </div>
