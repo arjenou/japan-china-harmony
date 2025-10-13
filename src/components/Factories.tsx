@@ -1,4 +1,4 @@
-import { Building2, Users, Wrench } from "lucide-react";
+import { Building2, Users, Wrench, MapPin, Maximize2, ClipboardCheck, Cog } from "lucide-react";
 
 const factories = [
   {
@@ -40,12 +40,14 @@ const Factories = () => {
               </div>
               
               <div className="space-y-3 text-muted-foreground">
-                <div className="flex items-start gap-2">
-                  <span className="font-semibold text-foreground min-w-[100px]">所在地：</span>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-foreground">所在地：</span>
                   <span>{factory.location}</span>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="font-semibold text-foreground min-w-[100px]">面積：</span>
+                <div className="flex items-center gap-2">
+                  <Maximize2 className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-foreground">面積：</span>
                   <span>{factory.area}</span>
                 </div>
                 
@@ -61,16 +63,18 @@ const Factories = () => {
                       <span className="font-semibold text-foreground">技術者：</span>
                       <span>{factory.engineers}</span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-semibold text-foreground min-w-[100px]">検査員：</span>
+                    <div className="flex items-center gap-2">
+                      <ClipboardCheck className="w-4 h-4 text-primary" />
+                      <span className="font-semibold text-foreground">検査員：</span>
                       <span>{factory.inspectors}</span>
                     </div>
                   </>
                 )}
                 
                 {factory.capacity && (
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-foreground min-w-[100px]">生産能力：</span>
+                  <div className="flex items-center gap-2">
+                    <Cog className="w-4 h-4 text-primary" />
+                    <span className="font-semibold text-foreground">生産能力：</span>
                     <span>{factory.capacity}</span>
                   </div>
                 )}
