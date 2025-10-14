@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Philosophy from "@/components/Philosophy";
 import Factories from "@/components/Factories";
@@ -8,15 +9,18 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <main className="min-h-screen">
-      <Hero />
-      <Philosophy />
-      <Factories />
-      <Services />
-      <Products />
-      <Contact />
-      <Footer />
-    </main>
+    <>
+      <Navbar />
+      <main className="min-h-screen">
+        <Hero />
+        <Philosophy />
+        <Factories />
+        <Services />
+        <Products />
+        <Contact />
+        <Footer />
+      </main>
+    </>
   );
 };
 
