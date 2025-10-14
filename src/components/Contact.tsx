@@ -153,8 +153,23 @@ const Contact = () => {
             
             {/* Map */}
             <div className="bg-card p-4 rounded-xl shadow-card border border-border">
-              <div className="aspect-video bg-secondary/30 rounded-lg flex items-center justify-center">
-                <p className="text-muted-foreground">地図表示エリア</p>
+              <div className="aspect-video bg-secondary/30 rounded-lg overflow-hidden relative">
+                <iframe
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=121.4346%2C31.2194%2C121.4446%2C31.2244&layer=mapnik&marker=31.2219%2C121.4396"
+                  className="w-full h-full border-0"
+                  title="上海英物国際貿易有限会社 地図"
+                  allowFullScreen
+                />
+                <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded text-xs">
+                  <a 
+                    href="https://www.openstreetmap.org/?mlat=31.2219&mlon=121.4396#map=16/31.2219/121.4396"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    大きな地図を表示
+                  </a>
+                </div>
               </div>
             </div>
           </div>

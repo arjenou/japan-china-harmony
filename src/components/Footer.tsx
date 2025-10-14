@@ -22,7 +22,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">お問い合わせ</h4>
             <p className="text-sm text-primary-foreground/80">
-              電話: +86-21-XXXX-XXXX<br />
+              電話: 013661548592<br />
               メール: info@eimono-trade.com
             </p>
           </div>
