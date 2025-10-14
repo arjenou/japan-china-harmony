@@ -131,7 +131,7 @@ const Products = () => {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
               {currentProducts.map((product) => (
                 <div 
                   key={product.id}
@@ -145,11 +145,11 @@ const Products = () => {
                       className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                     />
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-base font-bold mb-1 text-foreground h-12 line-clamp-2">
+                  <div className="p-3 md:p-4">
+                    <h3 className="text-sm md:text-base font-bold mb-1 text-foreground h-10 md:h-12 line-clamp-2">
                       {product.nameJa}
                     </h3>
-                    <p className="text-xs text-muted-foreground h-8 line-clamp-2">
+                    <p className="text-xs text-muted-foreground h-6 md:h-8 line-clamp-2">
                       {product.name}
                     </p>
                   </div>

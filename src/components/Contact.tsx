@@ -114,17 +114,15 @@ const Contact = () => {
               <h3 className="text-2xl font-bold mb-6 text-foreground">会社情報</h3>
               
               <div className="space-y-4">
-                <div className="flex items-start gap-4">
+                <div className="flex items-center gap-4">
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
                     <Building className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
                     <p className="font-semibold text-foreground mb-1">上海英物国際貿易有限会社</p>
-                    <p className="text-muted-foreground">
-                      Office I, 15/F, Huamin Hanjun Tower,<br />
-                      726 Yan'an West Road, Changning District,<br />
-                      Shanghai, China<br />
-                      〒200050
+                    <p className="text-muted-foreground leading-snug">
+                      Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br />
+                      Changning District, Shanghai, China 〒200050
                     </p>
                   </div>
                 </div>
