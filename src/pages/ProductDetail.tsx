@@ -71,7 +71,7 @@ const ProductDetail = () => {
             <div className="relative aspect-square bg-secondary/30 rounded-xl overflow-hidden group">
               <img
                 src={currentImage}
-                alt={product.nameJa}
+                alt={product.name}
                 className="w-full h-full object-cover"
               />
               
@@ -116,7 +116,7 @@ const ProductDetail = () => {
                   >
                     <img
                       src={`/Goods/zahuo/${product.folder}/${img}`}
-                      alt={`${product.nameJa} ${index + 1}`}
+                      alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -131,12 +131,9 @@ const ProductDetail = () => {
               <div className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
                 {product.category}
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-                {product.nameJa}
-              </h1>
-              <p className="text-lg text-muted-foreground">
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                 {product.name}
-              </p>
+              </h1>
             </div>
 
             <div className="w-full h-px bg-border" />

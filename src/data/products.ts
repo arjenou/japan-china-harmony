@@ -1,7 +1,6 @@
 export interface Product {
   id: number;
   name: string;
-  nameJa: string;
   image: string;
   category: string;
   folder: string;
@@ -11,8 +10,7 @@ export interface Product {
 export const products: Product[] = [
   {
     id: 1,
-    name: "商務背包電脳包",
-    nameJa: "ビジネスバックパック・ノートPCバッグ",
+    name: "ビジネスバックパック・ノートPCバッグ",
     image: "/Goods/zahuo/Business_Backpack_Laptop_Bag/O1CN015RbkQu1NO4N0GuzsC_!!955051559-0-cib.jpg",
     category: "バッグ類",
     folder: "Business_Backpack_Laptop_Bag",
@@ -26,8 +24,7 @@ export const products: Product[] = [
   },
   {
     id: 2,
-    name: "宠物按摩清洁梳毛手套",
-    nameJa: "ペットグルーミンググローブ",
+    name: "ペットグルーミンググローブ",
     image: "/Goods/zahuo/Pet_Grooming_Gloves_Hair_Removal_Massage/O1CN01jbqaT21G0z3dQzZR5_!!3172890561-0-cib (1).jpg",
     category: "その他雑貨",
     folder: "Pet_Grooming_Gloves_Hair_Removal_Massage",
@@ -41,8 +38,7 @@ export const products: Product[] = [
   },
   {
     id: 3,
-    name: "防割工作手套5级HPPE PU",
-    nameJa: "耐切創作業手袋レベル5",
+    name: "耐切創作業手袋レベル5",
     image: "/Goods/zahuo/AntiCut_Work_Gloves_Level5_HPPE_PU/O1CN019lcC4r1G0zGKz0W5i_!!3172890561-0-cib.jpg",
     category: "手袋類",
     folder: "AntiCut_Work_Gloves_Level5_HPPE_PU",
@@ -56,8 +52,7 @@ export const products: Product[] = [
   },
   {
     id: 4,
-    name: "帆布包",
-    nameJa: "キャンバスバッグ",
+    name: "キャンバスバッグ",
     image: "/Goods/zahuo/Canvas_Bag/O1CN01Hk30zG229mIZvPWTr_!!2216542277078-0-cib.jpg",
     category: "バッグ類",
     folder: "Canvas_Bag",
@@ -74,8 +69,7 @@ export const products: Product[] = [
   },
   {
     id: 5,
-    name: "干湿分离运动包",
-    nameJa: "ドライ・ウェット分離スポーツバッグ",
+    name: "ドライ・ウェット分離スポーツバッグ",
     image: "/Goods/zahuo/DryWet_Separation_Bag_1/O1CN010yiQ8520jNsBGLXiJ_!!2211190986885-0-cib.jpg",
     category: "バッグ類",
     folder: "DryWet_Separation_Bag_1",
@@ -92,8 +86,7 @@ export const products: Product[] = [
   },
   {
     id: 6,
-    name: "户外休闲包",
-    nameJa: "アウトドアレジャーバッグ",
+    name: "アウトドアレジャーバッグ",
     image: "/Goods/zahuo/Outdoor_Picnic_Mat_1/O1CN01lnh1R72BfDr8xWlZR_!!2677558365-0-cib.jpg",
     category: "バッグ類",
     folder: "Outdoor_Picnic_Mat_1",
@@ -101,8 +94,7 @@ export const products: Product[] = [
   },
   {
     id: 7,
-    name: "折叠双肩包",
-    nameJa: "折りたたみバックパック",
+    name: "折りたたみバックパック",
     image: "/Goods/zahuo/Folding_Fan_1/O1CN01hk5yhw1SlUZPGTcCS_!!2214314842287-0-cib.jpg",
     category: "バッグ類",
     folder: "Folding_Fan_1",
@@ -110,8 +102,7 @@ export const products: Product[] = [
   },
   {
     id: 8,
-    name: "牛皮隔热防烫手套",
-    nameJa: "牛革断熱防火手袋",
+    name: "牛革断熱防火手袋",
     image: "/Goods/zahuo/Cowhide_HeatInsulated_AntiScald_Gloves/O1CN01BXqWKM1G0zE7INUwu_!!3172890561-0-cib.jpg",
     category: "手袋類",
     folder: "Cowhide_HeatInsulated_AntiScald_Gloves",
@@ -119,8 +110,7 @@ export const products: Product[] = [
   },
   {
     id: 9,
-    name: "收纳箱",
-    nameJa: "収納ボックス",
+    name: "収納ボックス",
     image: "/Goods/zahuo/Storage_Bag/16745602169_1754173469.jpg",
     category: "収納用品",
     folder: "Storage_Bag",
@@ -128,8 +118,7 @@ export const products: Product[] = [
   },
   {
     id: 10,
-    name: "旅行收纳包",
-    nameJa: "トラベル収納バッグセット",
+    name: "トラベル収納バッグセット",
     image: "/Goods/zahuo/Travel_Storage_Bag_Set/O1CN01hRqbon1ZBUtVHTmZN_!!2206798623156-0-cib.jpg",
     category: "収納用品",
     folder: "Travel_Storage_Bag_Set",
@@ -138,8 +127,7 @@ export const products: Product[] = [
   // 其余产品保持简化配置，仅包含一张图片
   {
     id: 11,
-    name: "机械防护防滑骑行手套",
-    nameJa: "メカニカルプロテクション手袋",
+    name: "メカニカルプロテクション手袋",
     image: "/Goods/zahuo/Mechanical_Protection_AntiSlip_Riding_Gloves/O1CN01bSHTDj1G0zFbpisI7_!!3172890561-0-cib.jpg",
     category: "手袋類",
     folder: "Mechanical_Protection_AntiSlip_Riding_Gloves",
@@ -147,8 +135,7 @@ export const products: Product[] = [
   },
   {
     id: 12,
-    name: "皮带",
-    nameJa: "レザーベルト",
+    name: "レザーベルト",
     image: "/Goods/zahuo/Leather_Bag/14045068118_424161813.jpg",
     category: "その他雑貨",
     folder: "Leather_Bag",
@@ -156,8 +143,7 @@ export const products: Product[] = [
   },
   {
     id: 13,
-    name: "礼品袋",
-    nameJa: "ギフトバッグ",
+    name: "ギフトバッグ",
     image: "/Goods/zahuo/Gift_Bag/O1CN01a6eByy2NN9qiFlU0z_!!2217248849950-0-cib.jpg",
     category: "バッグ類",
     folder: "Gift_Bag",
@@ -165,8 +151,7 @@ export const products: Product[] = [
   },
   {
     id: 14,
-    name: "网格洗漱包",
-    nameJa: "メッシュランドリーバッグ",
+    name: "メッシュランドリーバッグ",
     image: "/Goods/zahuo/Mesh_Laundry_Bag/O1CN01FK7RX32FoAKcQOEtO_!!2212466938926-0-cib.jpg",
     category: "収納用品",
     folder: "Mesh_Laundry_Bag",
@@ -174,8 +159,7 @@ export const products: Product[] = [
   },
   {
     id: 15,
-    name: "芳纶隔热烧烤工业手套",
-    nameJa: "シリコン耐熱BBQ工業用手袋",
+    name: "シリコン耐熱BBQ工業用手袋",
     image: "/Goods/zahuo/Silicone_HeatResistant_BBQ_Industrial_Gloves/O1CN0108kZ7y1G0yxR4N0jD_!!3172890561-0-cib.jpg",
     category: "手袋類",
     folder: "Silicone_HeatResistant_BBQ_Industrial_Gloves",
@@ -183,8 +167,7 @@ export const products: Product[] = [
   },
   {
     id: 16,
-    name: "运动旅行包",
-    nameJa: "スポーツトラベルバッグ",
+    name: "スポーツトラベルバッグ",
     image: "/Goods/zahuo/Sports_Travel_Bag/O1CN01aGoPf21z3sSoeg5SJ_!!2217235126659-0-cib.jpg",
     category: "バッグ類",
     folder: "Sports_Travel_Bag",
@@ -192,8 +175,7 @@ export const products: Product[] = [
   },
   {
     id: 17,
-    name: "针织镂空包",
-    nameJa: "ニットワーク収納ボックス",
+    name: "ニットワーク収納ボックス",
     image: "/Goods/zahuo/Needlework_Storage_Box/O1CN018MtydR1ez1ySQ7Edq_!!2208547763941-0-cib.jpg",
     category: "収納用品",
     folder: "Needlework_Storage_Box",
@@ -201,8 +183,7 @@ export const products: Product[] = [
   },
   {
     id: 18,
-    name: "铅笔袋系列",
-    nameJa: "ペンケースシリーズ",
+    name: "ペンケースシリーズ",
     image: "/Goods/zahuo/Aluminum_Pen_Series/13575724437_348323961.jpg",
     category: "その他雑貨",
     folder: "Aluminum_Pen_Series",
@@ -210,8 +191,7 @@ export const products: Product[] = [
   },
   {
     id: 19,
-    name: "休闲包",
-    nameJa: "カジュアルショルダーバッグ",
+    name: "カジュアルショルダーバッグ",
     image: "/Goods/zahuo/AntiTheft_Shoulder_Bag/O1CN0195f9R21y2DOnRoSrz_!!974786520-0-cib.jpg",
     category: "バッグ類",
     folder: "AntiTheft_Shoulder_Bag",
@@ -219,8 +199,7 @@ export const products: Product[] = [
   },
   {
     id: 20,
-    name: "防水化妆包",
-    nameJa: "防水コスメティックバッグ",
+    name: "防水コスメティックバッグ",
     image: "/Goods/zahuo/Waterproof_Cosmetic_Bag_1/O1CN01dYF8rh2LetiqvPTM9_!!978439718-0-cib.jpg",
     category: "収納用品",
     folder: "Waterproof_Cosmetic_Bag_1",
@@ -228,8 +207,7 @@ export const products: Product[] = [
   },
   {
     id: 21,
-    name: "防水袋",
-    nameJa: "防水バッグ",
+    name: "防水バッグ",
     image: "/Goods/zahuo/Waterproof_Bag/O1CN01aJsUDW1eOqTKt73vs_!!2214517553862-0-cib.jpg",
     category: "バッグ類",
     folder: "Waterproof_Bag",
@@ -237,8 +215,7 @@ export const products: Product[] = [
   },
   {
     id: 22,
-    name: "400V绝缘触屏电工手套",
-    nameJa: "400V絶縁タッチスクリーン手袋",
+    name: "400V絶縁タッチスクリーン手袋",
     image: "/Goods/zahuo/Insulated_Gloves_400V_AntiSlip_Touchscreen/O1CN017XErSp1G0zGzhmdlq_!!3172890561-0-cib.jpg",
     category: "手袋類",
     folder: "Insulated_Gloves_400V_AntiSlip_Touchscreen",
@@ -246,8 +223,7 @@ export const products: Product[] = [
   },
   {
     id: 23,
-    name: "EVA儿童雨衣",
-    nameJa: "EVA子供用レインコート",
+    name: "EVA子供用レインコート",
     image: "/Goods/zahuo/EVA_Foam_Mat/O1CN01dyDlo61Ij4aO0XDGW_!!2217457270928-0-cib.jpg",
     category: "その他雑貨",
     folder: "EVA_Foam_Mat",
@@ -255,8 +231,7 @@ export const products: Product[] = [
   },
   {
     id: 24,
-    name: "休闲包2",
-    nameJa: "レジャーバッグ",
+    name: "レジャーバッグ",
     image: "/Goods/zahuo/Break_Time_1/O1CN016mzvfF1GEittj1LX9_!!2215510310591-0-cib.jpg",
     category: "バッグ類",
     folder: "Break_Time_1",
@@ -264,8 +239,7 @@ export const products: Product[] = [
   },
   {
     id: 25,
-    name: "保温饭包",
-    nameJa: "保温ランチボックス",
+    name: "保温ランチボックス",
     image: "/Goods/zahuo/Lunch_Box/8715833532_218301181.jpg",
     category: "その他雑貨",
     folder: "Lunch_Box",
@@ -273,8 +247,7 @@ export const products: Product[] = [
   },
   {
     id: 26,
-    name: "加热服",
-    nameJa: "ヒーター内蔵ウェア",
+    name: "ヒーター内蔵ウェア",
     image: "/Goods/zahuo/Thermal_Clothing/O1CN016fliNM25d2UAEGJxU_!!2215541507548-0-cib.jpg",
     category: "衣類",
     folder: "Thermal_Clothing",
@@ -282,8 +255,7 @@ export const products: Product[] = [
   },
   {
     id: 27,
-    name: "化妆包",
-    nameJa: "メイクアップポーチ",
+    name: "メイクアップポーチ",
     image: "/Goods/zahuo/Makeup_Bag_1/O1CN017FlLkz1XNkOQ958Kq_!!2208913202912-0-cib.jpg",
     category: "収納用品",
     folder: "Makeup_Bag_1",
@@ -291,8 +263,7 @@ export const products: Product[] = [
   },
   {
     id: 28,
-    name: "各种零钱包",
-    nameJa: "コインケース・財布",
+    name: "コインケース・財布",
     image: "/Goods/zahuo/Various_Wallets/O1CN01FW0Bjj1SlUsMZv2lm_!!2214314842287-0-cib.jpg",
     category: "その他雑貨",
     folder: "Various_Wallets",
@@ -300,8 +271,7 @@ export const products: Product[] = [
   },
   {
     id: 29,
-    name: "防割袖套",
-    nameJa: "耐切創アームカバー",
+    name: "耐切創アームカバー",
     image: "/Goods/zahuo/Break_Time_2/O1CN013BleR11G0yxJGVwHE_!!3172890561-0-cib.jpg",
     category: "その他雑貨",
     folder: "Break_Time_2",
@@ -309,8 +279,7 @@ export const products: Product[] = [
   },
   {
     id: 30,
-    name: "300度隔热双层烧烤手套",
-    nameJa: "300℃耐熱ダブルレイヤーBBQ手袋",
+    name: "300℃耐熱ダブルレイヤーBBQ手袋",
     image: "/Goods/zahuo/300C_HeatResistant_DoubleLayer_BBQ_Gloves/O1CN01gDBaAd1G0zFTGkF6N_!!3172890561-0-cib.jpg",
     category: "手袋類",
     folder: "300C_HeatResistant_DoubleLayer_BBQ_Gloves",

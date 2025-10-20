@@ -3,8 +3,8 @@ import { Lightbulb, HandshakeIcon, TrendingUp } from "lucide-react";
 const philosophies = [
   {
     icon: Lightbulb,
-    title: "小さな力で、大きな「わくわく」を。",
-    description: "少数精鋭だからこそ、メーカー様・小売様の「欲しい」をスピーディーにカタチにします。",
+    title: "少数精鋭だからこそ、御社の利益を最大化",
+    description: "中間コストを削減し、スピーディーな意思決定で、メーカー様・小売様双方の収益向上に貢献します。",
   },
   {
     icon: HandshakeIcon,

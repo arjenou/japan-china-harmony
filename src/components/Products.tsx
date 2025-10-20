@@ -39,8 +39,7 @@ const Products = () => {
 
   // Filter products
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.nameJa.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "全て" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -146,12 +145,9 @@ const Products = () => {
                     />
                   </div>
                   <div className="p-3 md:p-4">
-                    <h3 className="text-sm md:text-base font-bold mb-1 text-foreground h-10 md:h-12 line-clamp-2">
-                      {product.nameJa}
-                    </h3>
-                    <p className="text-xs text-muted-foreground h-6 md:h-8 line-clamp-2">
+                    <h3 className="text-sm md:text-base font-bold text-foreground line-clamp-2">
                       {product.name}
-                    </p>
+                    </h3>
                   </div>
                 </div>
               ))}
