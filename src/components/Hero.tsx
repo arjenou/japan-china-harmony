@@ -1,17 +1,53 @@
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-bg.jpg";
+import { useState, useEffect } from "react";
+import heroImage1 from "@/assets/hero-bg1.jpg";
+import heroImage2 from "@/assets/hero-bg2.jpg";
+import heroImage3 from "@/assets/hero-bg3.jpg";
 
 const Hero = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [heroImage1, heroImage2, heroImage3];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 5000); // 切り替え間隔: 5秒
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section id="home" className="relative min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Images with Overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src={heroImage} 
-          alt="上海英物国際貿易" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/60" />
+        {images.map((image, index) => (
+          <img
+            key={index}
+            src={image}
+            alt={`上海英物国際貿易 ${index + 1}`}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              index === currentImageIndex ? "opacity-100" : "opacity-0"
+            }`}
+            loading="eager"
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/40 to-primary/20" />
+      </div>
+
+      {/* Navigation Dots */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+        {images.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImageIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentImageIndex
+                ? "bg-accent w-8"
+                : "bg-white/50 hover:bg-white/75"
+            }`}
+            aria-label={`画像 ${index + 1} に切り替え`}
+          />
+        ))}
       </div>
 
       {/* Content */}
