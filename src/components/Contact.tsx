@@ -143,6 +143,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">メール</p>
+                    <p className="text-muted-foreground">eikoyang@mono-grp.com.cn</p>
                     <p className="text-muted-foreground">sandy_c@yiibi.top</p>
                   </div>
                 </div>

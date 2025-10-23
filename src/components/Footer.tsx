@@ -23,7 +23,8 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">お問い合わせ</h4>
             <p className="text-sm text-primary-foreground/80">
               電話: 013661548592<br />
-              メール: sandy_c@yiibi.top
+              メール: eikoyang@mono-grp.com.cn<br />
+              <span className="inline-block" style={{ marginLeft: '3.5em' }}>sandy_c@yiibi.top</span>
             </p>
           </div>
         </div>
