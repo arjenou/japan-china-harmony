@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,15 +43,6 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("全て");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-
-  // Fetch products from API with pagination
-  useEffect(() => {
-    fetchProducts();
-  }, [currentPage, itemsPerPage, selectedCategory, searchQuery]);
   
   // 搜索防抖 - 输入停止500ms后自动搜索
   useEffect(() => {
@@ -62,10 +54,10 @@ const Products = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      // 构建查询参数
+  // 使用 React Query 获取产品数据（带缓存）
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['products', currentPage, itemsPerPage, selectedCategory, searchQuery],
+    queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         pageSize: itemsPerPage.toString(),
@@ -80,33 +72,36 @@ const Products = () => {
       }
       
       const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      
       const data = await response.json();
       
-      if (data.products) {
-        // Transform API products to match our Product interface
-        const apiProducts: Product[] = data.products.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          image: `${API_BASE_URL}/api/images/${p.image}`,
-          category: p.category,
-          folder: p.folder,
-          images: p.images || [],
-          features: p.features,
-        }));
-        
-        setProducts(apiProducts);
-        setTotalProducts(data.total || 0);
-        setTotalPages(data.totalPages || 0);
-      }
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-      setProducts([]);
-      setTotalProducts(0);
-      setTotalPages(0);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      // Transform API products to match our Product interface
+      const apiProducts: Product[] = data.products.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        image: `${API_BASE_URL}/api/images/${p.image}`,
+        category: p.category,
+        folder: p.folder,
+        images: p.images || [],
+        features: p.features,
+      }));
+      
+      return {
+        products: apiProducts,
+        total: data.total || 0,
+        totalPages: data.totalPages || 0,
+      };
+    },
+    staleTime: 5 * 60 * 1000, // 5分钟内数据被视为新鲜
+    gcTime: 10 * 60 * 1000, // 缓存保留10分钟
+  });
+
+  const products = data?.products || [];
+  const totalProducts = data?.total || 0;
+  const totalPages = data?.totalPages || 0;
 
   return (
     <section id="products" className="py-20 bg-muted/30">

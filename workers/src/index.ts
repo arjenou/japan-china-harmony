@@ -33,12 +33,26 @@ app.get('/api/categories', async (c) => {
   return c.json({ categories });
 });
 
-// 获取所有商品（支持分页和搜索）
+// 获取所有商品（支持分页和搜索，带缓存）
 app.get('/api/products', async (c) => {
   const category = c.req.query('category');
   const search = c.req.query('search');
   const page = parseInt(c.req.query('page') || '1');
   const pageSize = parseInt(c.req.query('pageSize') || '12');
+  
+  // 生成缓存键
+  const cacheKey = new URL(c.req.url);
+  const cache = caches.default;
+  
+  // 尝试从缓存获取
+  let response = await cache.match(cacheKey.toString());
+  
+  if (response) {
+    // 添加缓存命中标记
+    const newResponse = new Response(response.body, response);
+    newResponse.headers.set('X-Cache', 'HIT');
+    return newResponse;
+  }
   
   try {
     // 构建查询条件
@@ -82,21 +96,48 @@ app.get('/api/products', async (c) => {
       (product as any).images = images.results.map((img: any) => img.image_url);
     }
     
-    return c.json({ 
+    const responseData = { 
       products: results,
       total,
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize)
+    };
+    
+    // 创建响应并设置缓存头
+    response = new Response(JSON.stringify(responseData), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300, s-maxage=600', // 客户端5分钟，CDN10分钟
+        'X-Cache': 'MISS',
+      },
     });
+    
+    // 存入缓存
+    c.executionCtx.waitUntil(cache.put(cacheKey.toString(), response.clone()));
+    
+    return response;
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
   }
 });
 
-// 获取单个商品
+// 获取单个商品（带缓存）
 app.get('/api/products/:id', async (c) => {
   const id = c.req.param('id');
+  
+  // 生成缓存键
+  const cacheKey = new URL(c.req.url);
+  const cache = caches.default;
+  
+  // 尝试从缓存获取
+  let response = await cache.match(cacheKey.toString());
+  
+  if (response) {
+    const newResponse = new Response(response.body, response);
+    newResponse.headers.set('X-Cache', 'HIT');
+    return newResponse;
+  }
   
   try {
     const product = await c.env.DB.prepare(
@@ -113,11 +154,41 @@ app.get('/api/products/:id', async (c) => {
     
     (product as any).images = images.results.map((img: any) => img.image_url);
     
-    return c.json({ product });
+    // 创建响应并设置缓存头
+    response = new Response(JSON.stringify({ product }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=600, s-maxage=1800', // 客户端10分钟，CDN30分钟
+        'X-Cache': 'MISS',
+      },
+    });
+    
+    // 存入缓存
+    c.executionCtx.waitUntil(cache.put(cacheKey.toString(), response.clone()));
+    
+    return response;
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
   }
 });
+
+// 辅助函数：清除商品相关缓存
+async function clearProductsCache(c: any) {
+  const cache = caches.default;
+  const baseUrl = new URL(c.req.url).origin;
+  
+  // 清除商品列表缓存（所有可能的分页和过滤组合）
+  // 注意：这是简化版本，实际可能需要更精细的缓存键管理
+  const keys = [
+    `${baseUrl}/api/products`,
+    `${baseUrl}/api/products?page=1`,
+    `${baseUrl}/api/products?page=1&pageSize=12`,
+  ];
+  
+  for (const key of keys) {
+    await cache.delete(key);
+  }
+}
 
 // 创建商品
 app.post('/api/products', async (c) => {
@@ -169,6 +240,9 @@ app.post('/api/products', async (c) => {
         'INSERT INTO product_images (product_id, image_url, display_order) VALUES (?, ?, ?)'
       ).bind(productId, images[i], i).run();
     }
+    
+    // 清除缓存
+    c.executionCtx.waitUntil(clearProductsCache(c));
     
     return c.json({ 
       success: true, 
@@ -232,6 +306,16 @@ app.put('/api/products/:id', async (c) => {
       }
     }
     
+    // 清除缓存
+    const cache = caches.default;
+    const baseUrl = new URL(c.req.url).origin;
+    c.executionCtx.waitUntil(
+      Promise.all([
+        clearProductsCache(c),
+        cache.delete(`${baseUrl}/api/products/${id}`)
+      ])
+    );
+    
     return c.json({ 
       success: true, 
       message: 'Product updated successfully' 
@@ -259,6 +343,16 @@ app.delete('/api/products/:id', async (c) => {
     // 删除数据库记录
     await c.env.DB.prepare('DELETE FROM product_images WHERE product_id = ?').bind(id).run();
     await c.env.DB.prepare('DELETE FROM products WHERE id = ?').bind(id).run();
+    
+    // 清除缓存
+    const cache = caches.default;
+    const baseUrl = new URL(c.req.url).origin;
+    c.executionCtx.waitUntil(
+      Promise.all([
+        clearProductsCache(c),
+        cache.delete(`${baseUrl}/api/products/${id}`)
+      ])
+    );
     
     return c.json({ 
       success: true, 
@@ -292,9 +386,20 @@ app.delete('/api/products/:id/images/:imageUrl', async (c) => {
   }
 });
 
-// 获取图片
+// 获取图片（强缓存，永不过期）
 app.get('/api/images/:key{.+}', async (c) => {
   const key = c.req.param('key');
+  
+  // 使用 Cloudflare Cache API
+  const cacheKey = new URL(c.req.url);
+  const cache = caches.default;
+  
+  // 尝试从缓存获取
+  let response = await cache.match(cacheKey.toString());
+  
+  if (response) {
+    return response;
+  }
   
   try {
     const object = await c.env.BUCKET.get(key);
@@ -306,9 +411,16 @@ app.get('/api/images/:key{.+}', async (c) => {
     const headers = new Headers();
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
-    headers.set('cache-control', 'public, max-age=31536000');
+    // 图片缓存1年（immutable表示永不改变）
+    headers.set('cache-control', 'public, max-age=31536000, immutable');
+    headers.set('X-Cache', 'MISS');
     
-    return new Response(object.body, { headers });
+    response = new Response(object.body, { headers });
+    
+    // 存入缓存
+    c.executionCtx.waitUntil(cache.put(cacheKey.toString(), response.clone()));
+    
+    return response;
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
   }

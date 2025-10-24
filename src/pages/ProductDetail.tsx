@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -12,19 +13,16 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
-
-  const fetchProduct = async () => {
-    setIsLoading(true);
-    
-    // Fetch from API
-    try {
+  // 使用 React Query 获取产品详情（带缓存）
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ['product', id],
+    queryFn: async () => {
       const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch product');
+      }
+      
       const data = await response.json();
       
       if (data.product) {
@@ -37,15 +35,14 @@ const ProductDetail = () => {
           images: data.product.images || [],
           features: data.product.features,
         };
-        setProduct(apiProduct);
+        return apiProduct;
       }
-    } catch (error) {
-      console.error('Failed to fetch product:', error);
-      setProduct(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return null;
+    },
+    staleTime: 10 * 60 * 1000, // 10分钟内数据被视为新鲜
+    gcTime: 30 * 60 * 1000, // 缓存保留30分钟
+    enabled: !!id, // 只在有id时才执行查询
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
