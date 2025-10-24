@@ -2,6 +2,11 @@ name = "yingwu-admin"
 main = "src/index.ts"
 compatibility_date = "2024-10-24"
 
+# 自定义域名路由
+# 需要在 Cloudflare Dashboard 中配置: Workers & Pages > yingwu-admin > Settings > Triggers
+# 添加自定义域名: www.mono-grp.com
+# 路由: www.mono-grp.com/api/*
+
 # D1 数据库配置
 [[d1_databases]]
 binding = "DB"

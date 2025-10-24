@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
 
-const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
+const API_BASE_URL = 'https://api.mono-grp.com';
 
 const categories = [
   '瑜伽服',

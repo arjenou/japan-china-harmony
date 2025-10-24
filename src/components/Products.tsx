@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { products } from "@/data/products";
+import { sampleProducts, type Product } from "@/data/products";
+
+const API_BASE_URL = 'https://api.mono-grp.com';
 
 const categories = [
   "全て",
@@ -39,6 +41,42 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("全て");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch products from API
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products`);
+      const data = await response.json();
+      
+      if (data.products && data.products.length > 0) {
+        // Transform API products to match our Product interface
+        const apiProducts: Product[] = data.products.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          image: `${API_BASE_URL}/api/images/${p.image}`,
+          category: p.category,
+          folder: p.folder,
+          images: p.images || [],
+          features: p.features,
+        }));
+        
+        // Combine sample products with API products
+        setProducts([...sampleProducts, ...apiProducts]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      // Keep sample products on error
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter products
   const filteredProducts = products.filter((product) => {
@@ -133,28 +171,34 @@ const Products = () => {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-              {currentProducts.map((product) => (
-                <div 
-                  key={product.id}
-                  onClick={() => navigate(`/product/${product.id}`)}
-                  className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden group cursor-pointer"
-                >
-                  <div className="aspect-square overflow-hidden bg-secondary/30">
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                    />
+            {isLoading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">読み込み中...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                {currentProducts.map((product) => (
+                  <div 
+                    key={product.id}
+                    onClick={() => navigate(`/product/${product.id}`)}
+                    className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden group cursor-pointer"
+                  >
+                    <div className="aspect-square overflow-hidden bg-secondary/30">
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                      />
+                    </div>
+                    <div className="p-3 md:p-4">
+                      <h3 className="text-sm md:text-base font-bold text-foreground line-clamp-2">
+                        {product.name}
+                      </h3>
+                    </div>
                   </div>
-                  <div className="p-3 md:p-4">
-                    <h3 className="text-sm md:text-base font-bold text-foreground line-clamp-2">
-                      {product.name}
-                    </h3>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (

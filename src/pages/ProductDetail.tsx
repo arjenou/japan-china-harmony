@@ -4,24 +4,74 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { products, type Product } from "@/data/products";
+import { sampleProducts, type Product } from "@/data/products";
+
+const API_BASE_URL = 'https://api.mono-grp.com';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isApiProduct, setIsApiProduct] = useState(false);
 
   useEffect(() => {
-    const foundProduct = products.find((p) => p.id === Number(id));
-    if (foundProduct) {
-      setProduct(foundProduct);
-    }
+    fetchProduct();
   }, [id]);
+
+  const fetchProduct = async () => {
+    setIsLoading(true);
+    
+    // First check sample products
+    const sampleProduct = sampleProducts.find((p) => p.id === Number(id));
+    if (sampleProduct) {
+      setProduct(sampleProduct);
+      setIsApiProduct(false);
+      setIsLoading(false);
+      return;
+    }
+
+    // Then fetch from API
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+      const data = await response.json();
+      
+      if (data.product) {
+        const apiProduct: Product = {
+          id: data.product.id,
+          name: data.product.name,
+          image: `${API_BASE_URL}/api/images/${data.product.image}`,
+          category: data.product.category,
+          folder: data.product.folder,
+          images: data.product.images || [],
+          features: data.product.features,
+        };
+        setProduct(apiProduct);
+        setIsApiProduct(true);
+      }
+    } catch (error) {
+      console.error('Failed to fetch product:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <p className="text-muted-foreground">読み込み中...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -39,7 +89,9 @@ const ProductDetail = () => {
     );
   }
 
-  const currentImage = `/Goods/zahuo/${product.folder}/${product.images[currentImageIndex]}`;
+  const currentImage = isApiProduct 
+    ? `${API_BASE_URL}/api/images/${product.images[currentImageIndex]}`
+    : `/Goods/zahuo/${product.folder}/${product.images[currentImageIndex]}`;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
@@ -115,7 +167,10 @@ const ProductDetail = () => {
                     }`}
                   >
                     <img
-                      src={`/Goods/zahuo/${product.folder}/${img}`}
+                      src={isApiProduct 
+                        ? `${API_BASE_URL}/api/images/${img}`
+                        : `/Goods/zahuo/${product.folder}/${img}`
+                      }
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -141,12 +196,20 @@ const ProductDetail = () => {
             <div className="space-y-4">
               <h2 className="text-xl font-bold text-foreground">商品の特徴</h2>
               <div className="prose prose-sm text-muted-foreground">
-                <ul className="space-y-2">
-                  <li>高品質な素材を使用</li>
-                  <li>実用性と耐久性を兼ね備えた設計</li>
-                  <li>日常使いに最適</li>
-                  <li>OEM/ODM対応可能</li>
-                </ul>
+                {product.features ? (
+                  <ul className="space-y-2">
+                    {product.features.split('\n').filter(f => f.trim()).map((feature, index) => (
+                      <li key={index}>{feature}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul className="space-y-2">
+                    <li>高品質な素材を使用</li>
+                    <li>実用性と耐久性を兼ね備えた設計</li>
+                    <li>日常使いに最適</li>
+                    <li>OEM/ODM対応可能</li>
+                  </ul>
+                )}
               </div>
             </div>
 
