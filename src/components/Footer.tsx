@@ -30,7 +30,7 @@ const Footer = () => {
         </div>
         
         <div className="pt-8 border-t border-primary-foreground/20 text-center text-sm text-primary-foreground/80">
-          <p>&copy; {new Date().getFullYear()} 上海英物国際貿易有限会社. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} 上海英物国際貿易有限会社. すべての権利予約。</p>
         </div>
       </div>
     </footer>

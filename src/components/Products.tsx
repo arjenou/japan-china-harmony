@@ -25,11 +25,11 @@ const API_BASE_URL = 'https://api.mono-grp.com';
 
 const categories = [
   "全て",
-  "瑜伽服",
-  "瑜伽器具",
-  "运动休闲类",
-  "功能性服装",
-  "包类",
+  "ヨガウェア",
+  "ヨガ用具",
+  "スポーツ・レジャー",
+  "機能性ウェア",
+  "バッグ類",
   "軍手と手袋",
   "雑貨類",
   "アニメ類",
@@ -103,7 +103,7 @@ const Products = () => {
           <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
             {/* Search */}
             <div className="bg-primary text-primary-foreground p-4 rounded-lg">
-              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">SEARCH</h3>
+              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">検索</h3>
               <div className="relative">
                 <Input
                   type="text"
@@ -124,7 +124,7 @@ const Products = () => {
 
             {/* Category */}
             <div className="bg-primary text-primary-foreground p-4 rounded-lg">
-              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">CATEGORY</h3>
+              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">カテゴリー</h3>
               <ul className="space-y-1">
                 {categories.map((category) => (
                   <li key={category}>
