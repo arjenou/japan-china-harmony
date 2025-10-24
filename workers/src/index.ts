@@ -16,13 +16,13 @@ app.use('/*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// 分类列表
+// 分类列表（日语）
 const categories = [
-  '瑜伽服',
-  '瑜伽器具',
-  '运动休闲类',
-  '功能性服装',
-  '包类',
+  'ヨガウェア',
+  'ヨガ用具',
+  'スポーツ・レジャー',
+  '機能性ウェア',
+  'バッグ類',
   '軍手と手袋',
   '雑貨類',
   'アニメ類'
@@ -33,22 +33,45 @@ app.get('/api/categories', async (c) => {
   return c.json({ categories });
 });
 
-// 获取所有商品
+// 获取所有商品（支持分页和搜索）
 app.get('/api/products', async (c) => {
   const category = c.req.query('category');
+  const search = c.req.query('search');
+  const page = parseInt(c.req.query('page') || '1');
+  const pageSize = parseInt(c.req.query('pageSize') || '12');
   
   try {
-    let query = 'SELECT * FROM products';
-    const params: string[] = [];
+    // 构建查询条件
+    let whereConditions: string[] = [];
+    const params: any[] = [];
     
-    if (category) {
-      query += ' WHERE category = ?';
+    if (category && category !== '全て') {
+      whereConditions.push('category = ?');
       params.push(category);
     }
     
-    query += ' ORDER BY created_at DESC';
+    if (search) {
+      whereConditions.push('name LIKE ?');
+      params.push(`%${search}%`);
+    }
     
-    const { results } = await c.env.DB.prepare(query).bind(...params).all();
+    const whereClause = whereConditions.length > 0 
+      ? ' WHERE ' + whereConditions.join(' AND ')
+      : '';
+    
+    // 获取总数
+    const countQuery = `SELECT COUNT(*) as total FROM products${whereClause}`;
+    const countResult = await c.env.DB.prepare(countQuery).bind(...params).first();
+    const total = (countResult as any)?.total || 0;
+    
+    // 计算偏移量
+    const offset = (page - 1) * pageSize;
+    
+    // 获取分页数据
+    const query = `SELECT * FROM products${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const { results } = await c.env.DB.prepare(query)
+      .bind(...params, pageSize, offset)
+      .all();
     
     // 获取每个商品的图片
     for (const product of results) {
@@ -59,7 +82,13 @@ app.get('/api/products', async (c) => {
       (product as any).images = images.results.map((img: any) => img.image_url);
     }
     
-    return c.json({ products: results });
+    return c.json({ 
+      products: results,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
   }

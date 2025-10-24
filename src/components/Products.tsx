@@ -37,22 +37,49 @@ const categories = [
 
 const Products = () => {
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("全て");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  // Fetch products from API
+  // Fetch products from API with pagination
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [currentPage, itemsPerPage, selectedCategory, searchQuery]);
+  
+  // 搜索防抖 - 输入停止500ms后自动搜索
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setCurrentPage(1);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products`);
+      // 构建查询参数
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: itemsPerPage.toString(),
+      });
+      
+      if (selectedCategory !== "全て") {
+        params.append('category', selectedCategory);
+      }
+      
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
       const data = await response.json();
       
       if (data.products) {
@@ -68,27 +95,18 @@ const Products = () => {
         }));
         
         setProducts(apiProducts);
+        setTotalProducts(data.total || 0);
+        setTotalPages(data.totalPages || 0);
       }
     } catch (error) {
       console.error('Failed to fetch products:', error);
       setProducts([]);
+      setTotalProducts(0);
+      setTotalPages(0);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Filter products
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "全て" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
   return (
     <section id="products" className="py-20 bg-muted/30">
@@ -108,12 +126,22 @@ const Products = () => {
                 <Input
                   type="text"
                   placeholder="キーワードを入力"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setSearchQuery(searchInput);
+                      setCurrentPage(1);
+                    }
+                  }}
                   className="bg-card text-foreground border-border pr-10"
                 />
                 <Button 
                   size="sm" 
+                  onClick={() => {
+                    setSearchQuery(searchInput);
+                    setCurrentPage(1);
+                  }}
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 px-3 bg-muted hover:bg-muted/80"
                 >
                   検索
@@ -152,7 +180,7 @@ const Products = () => {
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-border">
               <div className="text-sm text-muted-foreground">
-                <span className="text-foreground font-semibold">{filteredProducts.length}件</span>の商品が見つかりました
+                <span className="text-foreground font-semibold">{totalProducts}件</span>の商品が見つかりました
               </div>
               <Select value={itemsPerPage.toString()} onValueChange={(value) => {
                 setItemsPerPage(Number(value));
@@ -174,9 +202,13 @@ const Products = () => {
               <div className="text-center py-12">
                 <p className="text-muted-foreground">読み込み中...</p>
               </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">商品が見つかりませんでした</p>
+              </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-                {currentProducts.map((product) => (
+                {products.map((product) => (
                   <div 
                     key={product.id}
                     id={`product-${product.id}`}
