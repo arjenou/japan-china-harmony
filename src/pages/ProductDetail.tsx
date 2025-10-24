@@ -51,6 +51,29 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  const nextImage = () => {
+    if (product) {
+      setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (product) {
+      setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+    }
+  };
+
+  const handleBackToProducts = () => {
+    navigate("/");
+    // Wait for navigation to complete, then scroll to products section
+    setTimeout(() => {
+      const productsSection = document.getElementById("products");
+      if (productsSection) {
+        productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -69,9 +92,9 @@ const ProductDetail = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <h2 className="text-2xl font-bold mb-4">商品が見つかりません</h2>
-          <Button onClick={() => navigate("/")} variant="outline">
+          <Button onClick={handleBackToProducts} variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            ホームに戻る
+            商品一覧に戻る
           </Button>
         </div>
         <Footer />
@@ -81,14 +104,6 @@ const ProductDetail = () => {
 
   const currentImage = `${API_BASE_URL}/api/images/${product.images[currentImageIndex]}`;
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -96,7 +111,7 @@ const ProductDetail = () => {
       <div className="container mx-auto px-4 py-24">
         {/* Back Button */}
         <Button 
-          onClick={() => navigate("/")} 
+          onClick={handleBackToProducts} 
           variant="ghost" 
           className="mb-6 hover:bg-primary/5"
         >
