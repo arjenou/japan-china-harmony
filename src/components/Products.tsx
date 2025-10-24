@@ -19,7 +19,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { sampleProducts, type Product } from "@/data/products";
+import { type Product } from "@/data/products";
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
@@ -41,7 +41,7 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("全て");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch products from API
@@ -55,7 +55,7 @@ const Products = () => {
       const response = await fetch(`${API_BASE_URL}/api/products`);
       const data = await response.json();
       
-      if (data.products && data.products.length > 0) {
+      if (data.products) {
         // Transform API products to match our Product interface
         const apiProducts: Product[] = data.products.map((p: any) => ({
           id: p.id,
@@ -67,12 +67,11 @@ const Products = () => {
           features: p.features,
         }));
         
-        // Combine sample products with API products
-        setProducts([...sampleProducts, ...apiProducts]);
+        setProducts(apiProducts);
       }
     } catch (error) {
       console.error('Failed to fetch products:', error);
-      // Keep sample products on error
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }

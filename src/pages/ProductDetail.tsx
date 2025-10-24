@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { sampleProducts, type Product } from "@/data/products";
+import { type Product } from "@/data/products";
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
@@ -14,7 +14,6 @@ const ProductDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isApiProduct, setIsApiProduct] = useState(false);
 
   useEffect(() => {
     fetchProduct();
@@ -23,16 +22,7 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     setIsLoading(true);
     
-    // First check sample products
-    const sampleProduct = sampleProducts.find((p) => p.id === Number(id));
-    if (sampleProduct) {
-      setProduct(sampleProduct);
-      setIsApiProduct(false);
-      setIsLoading(false);
-      return;
-    }
-
-    // Then fetch from API
+    // Fetch from API
     try {
       const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
       const data = await response.json();
@@ -48,10 +38,10 @@ const ProductDetail = () => {
           features: data.product.features,
         };
         setProduct(apiProduct);
-        setIsApiProduct(true);
       }
     } catch (error) {
       console.error('Failed to fetch product:', error);
+      setProduct(null);
     } finally {
       setIsLoading(false);
     }
@@ -89,9 +79,7 @@ const ProductDetail = () => {
     );
   }
 
-  const currentImage = isApiProduct 
-    ? `${API_BASE_URL}/api/images/${product.images[currentImageIndex]}`
-    : `/Goods/zahuo/${product.folder}/${product.images[currentImageIndex]}`;
+  const currentImage = `${API_BASE_URL}/api/images/${product.images[currentImageIndex]}`;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
@@ -167,10 +155,7 @@ const ProductDetail = () => {
                     }`}
                   >
                     <img
-                      src={isApiProduct 
-                        ? `${API_BASE_URL}/api/images/${img}`
-                        : `/Goods/zahuo/${product.folder}/${img}`
-                      }
+                      src={`${API_BASE_URL}/api/images/${img}`}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
