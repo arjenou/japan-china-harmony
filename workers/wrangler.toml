@@ -1,0 +1,20 @@
+name = "yingwu-admin"
+main = "src/index.ts"
+compatibility_date = "2024-10-24"
+
+# D1 数据库配置
+[[d1_databases]]
+binding = "DB"
+database_name = "yingwu_products"
+database_id = "bb8cd306-4b73-48d3-806e-a981752e5a19"
+
+# R2 存储配置（用于图片）
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "yingwu-images"
+preview_bucket_name = "yingwu-images-preview"
+
+# CORS 配置
+[vars]
+ALLOWED_ORIGINS = "*"
+
