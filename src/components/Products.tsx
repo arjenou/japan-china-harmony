@@ -179,7 +179,11 @@ const Products = () => {
                 {currentProducts.map((product) => (
                   <div 
                     key={product.id}
-                    onClick={() => navigate(`/product/${product.id}`)}
+                    id={`product-${product.id}`}
+                    onClick={() => {
+                      sessionStorage.setItem('lastViewedProductId', product.id.toString());
+                      navigate(`/product/${product.id}`);
+                    }}
                     className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden group cursor-pointer"
                   >
                     <div className="aspect-square overflow-hidden bg-secondary/30">

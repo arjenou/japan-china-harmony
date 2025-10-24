@@ -65,11 +65,29 @@ const ProductDetail = () => {
 
   const handleBackToProducts = () => {
     navigate("/");
-    // Wait for navigation to complete, then scroll to products section
+    // Wait for navigation to complete, then scroll to the specific product
     setTimeout(() => {
-      const productsSection = document.getElementById("products");
-      if (productsSection) {
-        productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      const lastProductId = sessionStorage.getItem('lastViewedProductId');
+      if (lastProductId) {
+        const productElement = document.getElementById(`product-${lastProductId}`);
+        if (productElement) {
+          // Scroll to the specific product with some offset for better visibility
+          productElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          // Clean up
+          sessionStorage.removeItem('lastViewedProductId');
+        } else {
+          // Fallback to products section if product not found
+          const productsSection = document.getElementById("products");
+          if (productsSection) {
+            productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+      } else {
+        // Fallback to products section if no product ID stored
+        const productsSection = document.getElementById("products");
+        if (productsSection) {
+          productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }
     }, 100);
   };
