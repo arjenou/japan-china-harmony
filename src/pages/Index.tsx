@@ -10,8 +10,30 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   useEffect(() => {
-    // 页面加载或刷新时，滚动到顶部
-    window.scrollTo(0, 0);
+    // 检查是否有待滚动的目标section
+    const scrollTarget = sessionStorage.getItem('scrollTarget');
+    
+    if (scrollTarget) {
+      // 清除存储的目标
+      sessionStorage.removeItem('scrollTarget');
+      
+      // 等待页面完全渲染后再滚动
+      setTimeout(() => {
+        const element = document.getElementById(scrollTarget);
+        if (element) {
+          const offset = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    } else {
+      // 没有目标section，正常滚动到顶部
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   return (
