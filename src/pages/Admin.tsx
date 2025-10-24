@@ -35,7 +35,7 @@ interface Product {
 export default function Admin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { toast } = useToast();
@@ -56,7 +56,7 @@ export default function Admin() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const url = selectedCategory 
+      const url = selectedCategory && selectedCategory !== 'all'
         ? `${API_BASE_URL}/api/products?category=${encodeURIComponent(selectedCategory)}`
         : `${API_BASE_URL}/api/products`;
       
@@ -379,7 +379,7 @@ export default function Admin() {
               <SelectValue placeholder="全部分类" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">全部分类</SelectItem>
+              <SelectItem value="all">全部分类</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
