@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Select,
   SelectContent,
@@ -24,25 +25,31 @@ import { type Product } from "@/data/products";
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
-const categories = [
-  "全て",
-  "ヨガウェア",
-  "ヨガ用具",
-  "スポーツ・レジャー",
-  "機能性ウェア",
-  "バッグ類",
-  "軍手と手袋",
-  "雑貨類",
-  "アニメ類",
-];
-
 const Products = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("全て");
+  const [selectedCategory, setSelectedCategory] = useState(t('products.categories.all'));
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  
+  const categories = [
+    t('products.categories.all'),
+    t('products.categories.yoga'),
+    t('products.categories.yogaTools'),
+    t('products.categories.sports'),
+    t('products.categories.functional'),
+    t('products.categories.bags'),
+    t('products.categories.gloves'),
+    t('products.categories.goods'),
+    t('products.categories.anime'),
+  ];
+  
+  // 当语言改变时，重置选中的分类为当前语言的"全部"
+  useEffect(() => {
+    setSelectedCategory(t('products.categories.all'));
+  }, [language]);
   
   // 搜索防抖 - 输入停止500ms后自动搜索
   useEffect(() => {
@@ -63,8 +70,22 @@ const Products = () => {
         pageSize: itemsPerPage.toString(),
       });
       
-      if (selectedCategory !== "全て") {
-        params.append('category', selectedCategory);
+      // 需要将翻译后的分类名称映射回原始分类名称
+      const categoryMap: Record<string, string> = {
+        [t('products.categories.all')]: '全て',
+        [t('products.categories.yoga')]: 'ヨガウェア',
+        [t('products.categories.yogaTools')]: 'ヨガ用具',
+        [t('products.categories.sports')]: 'スポーツ・レジャー',
+        [t('products.categories.functional')]: '機能性ウェア',
+        [t('products.categories.bags')]: 'バッグ類',
+        [t('products.categories.gloves')]: '軍手と手袋',
+        [t('products.categories.goods')]: '雑貨類',
+        [t('products.categories.anime')]: 'アニメ類',
+      };
+      
+      const originalCategory = categoryMap[selectedCategory] || selectedCategory;
+      if (originalCategory !== '全て') {
+        params.append('category', originalCategory);
       }
       
       if (searchQuery.trim()) {
@@ -107,7 +128,7 @@ const Products = () => {
     <section id="products" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
-          製品紹介
+          {t('products.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         
@@ -116,11 +137,11 @@ const Products = () => {
           <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
             {/* Search */}
             <div className="bg-primary text-primary-foreground p-4 rounded-lg">
-              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">検索</h3>
+              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">{t('products.searchTitle')}</h3>
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="キーワードを入力"
+                  placeholder={t('products.searchPlaceholder')}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -139,15 +160,15 @@ const Products = () => {
                   }}
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 px-3 bg-muted hover:bg-muted/80"
                 >
-                  検索
+                  {t('products.searchButton')}
                 </Button>
               </div>
-              <p className="text-xs mt-2 opacity-80">品番、品名等で検索ができます</p>
+              <p className="text-xs mt-2 opacity-80">{t('products.searchHint')}</p>
             </div>
 
             {/* Category */}
             <div className="bg-primary text-primary-foreground p-4 rounded-lg">
-              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">カテゴリー</h3>
+              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">{t('products.categoryTitle')}</h3>
               <ul className="space-y-1">
                 {categories.map((category) => (
                   <li key={category}>
@@ -175,7 +196,7 @@ const Products = () => {
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-border">
               <div className="text-sm text-muted-foreground">
-                <span className="text-foreground font-semibold">{totalProducts}件</span>の商品が見つかりました
+                <span className="text-foreground font-semibold">{totalProducts}</span>{t('products.resultsText')}
               </div>
               <Select value={itemsPerPage.toString()} onValueChange={(value) => {
                 setItemsPerPage(Number(value));
@@ -185,9 +206,9 @@ const Products = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover">
-                  <SelectItem value="12">12件</SelectItem>
-                  <SelectItem value="20">20件</SelectItem>
-                  <SelectItem value="36">36件</SelectItem>
+                  <SelectItem value="12">12{t('products.itemsPerPage')}</SelectItem>
+                  <SelectItem value="20">20{t('products.itemsPerPage')}</SelectItem>
+                  <SelectItem value="36">36{t('products.itemsPerPage')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -195,11 +216,11 @@ const Products = () => {
             {/* Products Grid */}
             {isLoading ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">読み込み中...</p>
+                <p className="text-muted-foreground">{t('products.loading')}</p>
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">商品が見つかりませんでした</p>
+                <p className="text-muted-foreground">{t('products.noResults')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">

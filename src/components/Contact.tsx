@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone, Building } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,8 +19,8 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "お問い合わせを受け付けました",
-      description: "担当者より折り返しご連絡させていただきます。",
+      title: t('contact.successTitle'),
+      description: t('contact.successMessage'),
     });
     setFormData({ name: "", email: "", company: "", message: "" });
   };
@@ -31,7 +33,7 @@ const Contact = () => {
     <section id="contact" className="py-20 gradient-subtle">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
-          お問い合わせ
+          {t('contact.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         
@@ -42,7 +44,7 @@ const Contact = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold mb-2 text-foreground">
-                    お名前 *
+                    {t('contact.name')} {t('contact.required')}
                   </label>
                   <Input
                     id="name"
@@ -56,7 +58,7 @@ const Contact = () => {
                 
                 <div>
                   <label htmlFor="email" className="block text-sm font-semibold mb-2 text-foreground">
-                    メールアドレス *
+                    {t('contact.email')} {t('contact.required')}
                   </label>
                   <Input
                     id="email"
@@ -71,7 +73,7 @@ const Contact = () => {
                 
                 <div>
                   <label htmlFor="company" className="block text-sm font-semibold mb-2 text-foreground">
-                    会社名
+                    {t('contact.company')}
                   </label>
                   <Input
                     id="company"
@@ -84,7 +86,7 @@ const Contact = () => {
                 
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold mb-2 text-foreground">
-                    お問い合わせ内容 *
+                    {t('contact.message')} {t('contact.required')}
                   </label>
                   <Textarea
                     id="message"
@@ -101,7 +103,7 @@ const Contact = () => {
                   type="submit" 
                   className="w-full bg-primary hover:bg-primary-glow text-primary-foreground shadow-glow transition-smooth"
                 >
-                  送信する
+                  {t('contact.send')}
                 </Button>
               </form>
             </div>
@@ -111,7 +113,7 @@ const Contact = () => {
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Contact Info */}
             <div className="bg-card p-8 rounded-xl shadow-card border border-border">
-              <h3 className="text-2xl font-bold mb-6 text-foreground">会社情報</h3>
+              <h3 className="text-2xl font-bold mb-6 text-foreground">{t('contact.companyInfo')}</h3>
               
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
@@ -119,7 +121,7 @@ const Contact = () => {
                     <Building className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground mb-1">上海英物国際貿易有限会社</p>
+                    <p className="font-semibold text-foreground mb-1">{t('contact.companyName')}</p>
                     <p className="text-muted-foreground leading-snug">
                       Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br />
                       Changning District, Shanghai, China 〒200050
@@ -132,8 +134,8 @@ const Contact = () => {
                     <Phone className="w-6 h-6 text-accent-foreground" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">電話</p>
-                    <p className="text-muted-foreground">013661548592</p>
+                    <p className="font-semibold text-foreground">{t('contact.phone')}</p>
+                    <p className="text-muted-foreground">{t('contact.phoneValue')}</p>
                   </div>
                 </div>
                 
@@ -142,9 +144,9 @@ const Contact = () => {
                     <Mail className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">メール</p>
-                    <p className="text-muted-foreground">eikoyang@mono-grp.com.cn</p>
-                    <p className="text-muted-foreground">sandy_c@yiibi.top</p>
+                    <p className="font-semibold text-foreground">{t('contact.emailLabel')}</p>
+                    <p className="text-muted-foreground">{t('contact.emailValue')}</p>
+                    <p className="text-muted-foreground">{t('contact.emailValue2')}</p>
                   </div>
                 </div>
               </div>
@@ -156,7 +158,7 @@ const Contact = () => {
                 <iframe
                   src="https://www.openstreetmap.org/export/embed.html?bbox=121.4346%2C31.2194%2C121.4446%2C31.2244&layer=mapnik&marker=31.2219%2C121.4396"
                   className="w-full h-full border-0"
-                  title="上海英物国際貿易有限会社 地図"
+                  title={t('contact.mapTitle')}
                   allowFullScreen
                 />
                 <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded text-xs">
@@ -166,7 +168,7 @@ const Contact = () => {
                     rel="noopener noreferrer"
                     className="text-primary hover:underline"
                   >
-                    大きな地図を表示
+                    {t('contact.mapViewLarge')}
                   </a>
                 </div>
               </div>

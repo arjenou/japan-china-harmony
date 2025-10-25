@@ -1,29 +1,32 @@
 import { Lightbulb, HandshakeIcon, TrendingUp } from "lucide-react";
-
-const philosophies = [
-  {
-    icon: Lightbulb,
-    title: "少数精鋭だからこそ、御社の利益を最大化",
-    description: "中間コストを削減し、スピーディーな意思決定で、メーカー様・小売様双方の収益向上に貢献します。",
-  },
-  {
-    icon: HandshakeIcon,
-    title: "三方よしのトレードを。",
-    description: "サプライヤーも、お客様も、地球も笑顔になる仕組みを大切にします。",
-  },
-  {
-    icon: TrendingUp,
-    title: "継続は力なり、変化はチャンスなり。",
-    description: "市場の変化をデータで捉え、小さな改善を積み重ねることで、長くお付き合いいただけるパートナーを目指します。",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Philosophy = () => {
+  const { t } = useLanguage();
+  
+  const philosophies = [
+    {
+      icon: Lightbulb,
+      title: t('philosophy.philosophy1.title'),
+      description: t('philosophy.philosophy1.description'),
+    },
+    {
+      icon: HandshakeIcon,
+      title: t('philosophy.philosophy2.title'),
+      description: t('philosophy.philosophy2.description'),
+    },
+    {
+      icon: TrendingUp,
+      title: t('philosophy.philosophy3.title'),
+      description: t('philosophy.philosophy3.description'),
+    },
+  ];
+
   return (
     <section id="philosophy" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
-          経営理念
+          {t('philosophy.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         

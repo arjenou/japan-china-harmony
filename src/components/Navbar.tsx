@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,12 +45,12 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { id: "home", label: "ホーム" },
-    { id: "philosophy", label: "企業理念" },
-    { id: "factories", label: "工場紹介" },
-    { id: "services", label: "サービス" },
-    { id: "products", label: "商品紹介" },
-    { id: "contact", label: "お問い合わせ" },
+    { id: "home", label: t('nav.home') },
+    { id: "philosophy", label: t('nav.philosophy') },
+    { id: "factories", label: t('nav.factories') },
+    { id: "services", label: t('nav.services') },
+    { id: "products", label: t('nav.products') },
+    { id: "contact", label: t('nav.contact') },
   ];
 
   return (
@@ -84,6 +87,7 @@ const Navbar = () => {
                 {item.label}
               </Button>
             ))}
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile Menu Button */}
@@ -114,6 +118,9 @@ const Navbar = () => {
                   {item.label}
                 </Button>
               ))}
+              <div className="px-2 py-1">
+                <LanguageSwitcher />
+              </div>
             </div>
           </div>
         )}

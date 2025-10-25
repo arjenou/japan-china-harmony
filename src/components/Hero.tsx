@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage1 from "@/assets/hero-bg1.jpg";
 import heroImage2 from "@/assets/hero-bg2.jpg";
 import heroImage3 from "@/assets/hero-bg3.jpg";
@@ -7,6 +8,7 @@ import heroImage3 from "@/assets/hero-bg3.jpg";
 const Hero = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = [heroImage1, heroImage2, heroImage3];
+  const { t } = useLanguage();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -55,26 +57,26 @@ const Hero = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl">
           <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4 md:mb-6 animate-fade-in">
-            上海英物国際貿易有限会社
+            {t('hero.title')}
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-primary-foreground/90 mb-3 md:mb-4 leading-relaxed">
-            世界の"いいモノ"を作りに
+            {t('hero.subtitle')}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-primary-foreground/80 mb-3 md:mb-4 leading-relaxed">
-          中国では製造と貿易をワンストップで展開しております。長年にわたり培った優良工場ネットワークを活かし、ヨガウェア，機能性インナー，ニットウェア,雑貨・多種多様なファッション小物のOEM/ODMを、小ロットから大型量販店向けロットまで柔軟に対応しております。当社ではアニメ関連グッズの製造の実績がございます。年間100+アイテム以上の開発実績がございます。
+            {t('hero.description1')}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-primary-foreground/80 mb-3 md:mb-4 leading-relaxed">
-          当社ではアニメ関連グッズの製造の実績がございます。年間100+アイテム以上の開発実績がございます。
+            {t('hero.description2')}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-primary-foreground/90 mb-6 md:mb-8 leading-relaxed font-bold">
-          品質管理は日系企業基準に基づき、第三者による検品もご対応可能です。
+            {t('hero.description3')}
           </p>
           <Button 
             size="lg" 
             className="bg-accent hover:bg-accent-glow text-accent-foreground shadow-glow transition-smooth text-sm sm:text-base"
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            お問い合わせ
+            {t('hero.contact')}
           </Button>
         </div>
       </div>

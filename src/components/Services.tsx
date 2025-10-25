@@ -1,29 +1,32 @@
 import { Globe, Package, Sparkles } from "lucide-react";
-
-const services = [
-  {
-    icon: Globe,
-    title: "アジア工場との橋渡し",
-    description: "中国 協力工場5社以上",
-  },
-  {
-    icon: Package,
-    title: "小ロット対応",
-    description: "MOQ 100pcs～小ロット対応、短納期（最短20日）",
-  },
-  {
-    icon: Sparkles,
-    title: "OEM/ODM",
-    description: "企画・デザイン・サンプル・生産・検品・輸入・在庫保管まで\n雑貨問わず、PSE対応実績あり",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Services = () => {
+  const { t } = useLanguage();
+  
+  const services = [
+    {
+      icon: Globe,
+      title: t('services.service1.title'),
+      description: t('services.service1.description'),
+    },
+    {
+      icon: Package,
+      title: t('services.service2.title'),
+      description: t('services.service2.description'),
+    },
+    {
+      icon: Sparkles,
+      title: t('services.service3.title'),
+      description: t('services.service3.description'),
+    },
+  ];
+
   return (
     <section id="services" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
-          主要サービス
+          {t('services.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         

@@ -1,23 +1,26 @@
 import { Building2, Users, Wrench, MapPin, Maximize2, ClipboardCheck, Cog } from "lucide-react";
-
-const factories = [
-  {
-    name: "太倉工場",
-    location: "江蘇省太倉市",
-    area: "2,000㎡",
-    employees: "260名",
-    engineers: "25名",
-    inspectors: "20名",
-  },
-  {
-    name: "安徽工場",
-    location: "拠点数：2か所",
-    area: "5,000㎡",
-    capacity: "高周波ウェルダー溶着\n超音波ミシン溶着対応",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Factories = () => {
+  const { t } = useLanguage();
+  
+  const factories = [
+    {
+      name: t('factories.factory1.name'),
+      location: t('factories.factory1.location'),
+      area: t('factories.factory1.area'),
+      employees: t('factories.factory1.employees'),
+      engineers: t('factories.factory1.engineers'),
+      inspectors: t('factories.factory1.inspectors'),
+    },
+    {
+      name: t('factories.factory2.name'),
+      location: t('factories.factory2.location'),
+      area: t('factories.factory2.area'),
+      capacity: t('factories.factory2.capacity'),
+    },
+  ];
+
   const backgroundImages = [
     "/factor/factor.png",
     "/factor/factor2.png"
@@ -27,7 +30,7 @@ const Factories = () => {
     <section id="factories" className="py-20 gradient-subtle">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
-          協力工場
+          {t('factories.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         
@@ -57,12 +60,12 @@ const Factories = () => {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-accent drop-shadow-md" />
-                    <span className="font-semibold text-white drop-shadow-md">所在地：</span>
+                    <span className="font-semibold text-white drop-shadow-md">{t('factories.labels.location')}：</span>
                     <span className="text-white drop-shadow-md">{factory.location}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Maximize2 className="w-4 h-4 text-accent drop-shadow-md" />
-                    <span className="font-semibold text-white drop-shadow-md">面積：</span>
+                    <span className="font-semibold text-white drop-shadow-md">{t('factories.labels.area')}：</span>
                     <span className="text-white drop-shadow-md">{factory.area}</span>
                   </div>
                   
@@ -70,17 +73,17 @@ const Factories = () => {
                     <>
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-accent drop-shadow-md" />
-                        <span className="font-semibold text-white drop-shadow-md">従業員：</span>
+                        <span className="font-semibold text-white drop-shadow-md">{t('factories.labels.employees')}：</span>
                         <span className="text-white drop-shadow-md">{factory.employees}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Wrench className="w-4 h-4 text-accent drop-shadow-md" />
-                        <span className="font-semibold text-white drop-shadow-md">技術者：</span>
+                        <span className="font-semibold text-white drop-shadow-md">{t('factories.labels.engineers')}：</span>
                         <span className="text-white drop-shadow-md">{factory.engineers}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <ClipboardCheck className="w-4 h-4 text-accent drop-shadow-md" />
-                        <span className="font-semibold text-white drop-shadow-md">検査員：</span>
+                        <span className="font-semibold text-white drop-shadow-md">{t('factories.labels.inspectors')}：</span>
                         <span className="text-white drop-shadow-md">{factory.inspectors}</span>
                       </div>
                     </>
@@ -89,7 +92,7 @@ const Factories = () => {
                   {factory.capacity && (
                     <div className="flex items-start gap-2">
                       <Cog className="w-4 h-4 text-accent flex-shrink-0 mt-1 drop-shadow-md" />
-                      <span className="font-semibold text-white whitespace-nowrap drop-shadow-md">生産能力：</span>
+                      <span className="font-semibold text-white whitespace-nowrap drop-shadow-md">{t('factories.labels.capacity')}：</span>
                       <span className="whitespace-pre-line text-white drop-shadow-md">{factory.capacity}</span>
                     </div>
                   )}
