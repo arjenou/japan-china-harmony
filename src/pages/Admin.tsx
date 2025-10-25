@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
@@ -39,6 +39,12 @@ export default function Admin() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { toast } = useToast();
+  
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(12);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   // 表单状态
   const [formData, setFormData] = useState({
@@ -51,19 +57,26 @@ export default function Admin() {
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory]);
+  }, [selectedCategory, currentPage]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const url = selectedCategory && selectedCategory !== 'all'
-        ? `${API_BASE_URL}/api/products?category=${encodeURIComponent(selectedCategory)}`
-        : `${API_BASE_URL}/api/products`;
+      // 构建查询参数
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      params.append('pageSize', pageSize.toString());
+      
+      if (selectedCategory && selectedCategory !== 'all') {
+        params.append('category', selectedCategory);
+      }
       
       // 添加时间戳参数强制绕过缓存
-      const cacheBuster = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+      params.append('_t', Date.now().toString());
       
-      const response = await fetch(cacheBuster, {
+      const url = `${API_BASE_URL}/api/products?${params.toString()}`;
+      
+      const response = await fetch(url, {
         // 强制不使用缓存
         cache: 'no-store',
         headers: {
@@ -72,7 +85,10 @@ export default function Admin() {
         },
       });
       const data = await response.json();
+      
       setProducts(data.products || []);
+      setTotalPages(data.totalPages || 0);
+      setTotalCount(data.total || 0);
     } catch (error) {
       toast({
         title: '错误',
@@ -250,6 +266,16 @@ export default function Admin() {
     }
   };
 
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setCurrentPage(1); // 重置到第一页
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -387,21 +413,30 @@ export default function Admin() {
           </Dialog>
         </div>
 
-        <div className="mb-6">
-          <Label>筛选分类</Label>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="全部分类" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部分类</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <Label>筛选分类</Label>
+              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="全部分类" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部分类</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {totalCount > 0 && (
+            <div className="text-sm text-gray-600">
+              共 <span className="font-semibold">{totalCount}</span> 个商品
+            </div>
+          )}
         </div>
 
         {isLoading && !isDialogOpen ? (
@@ -476,6 +511,90 @@ export default function Admin() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* 分页控件 */}
+        {!isLoading && totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              上一页
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {/* 第一页 */}
+              {currentPage > 3 && (
+                <>
+                  <Button
+                    variant={currentPage === 1 ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageChange(1)}
+                    className="w-10"
+                  >
+                    1
+                  </Button>
+                  {currentPage > 4 && <span className="px-2 text-gray-500">...</span>}
+                </>
+              )}
+              
+              {/* 当前页附近的页码 */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  return page === currentPage || 
+                         page === currentPage - 1 || 
+                         page === currentPage + 1 ||
+                         page === currentPage - 2 ||
+                         page === currentPage + 2;
+                })
+                .map(page => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageChange(page)}
+                    className="w-10"
+                  >
+                    {page}
+                  </Button>
+                ))}
+              
+              {/* 最后一页 */}
+              {currentPage < totalPages - 2 && (
+                <>
+                  {currentPage < totalPages - 3 && <span className="px-2 text-gray-500">...</span>}
+                  <Button
+                    variant={currentPage === totalPages ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handlePageChange(totalPages)}
+                    className="w-10"
+                  >
+                    {totalPages}
+                  </Button>
+                </>
+              )}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="gap-1"
+            >
+              下一页
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+            
+            <span className="ml-4 text-sm text-gray-600">
+              第 {currentPage} / {totalPages} 页
+            </span>
           </div>
         )}
       </div>
