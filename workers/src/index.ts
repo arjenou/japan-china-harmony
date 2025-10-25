@@ -235,21 +235,24 @@ app.post('/api/products', async (c) => {
     
     // 上传图片到 R2
     const images: string[] = [];
-    const files = formData.getAll('images') as File[];
+    const files = formData.getAll('images');
     
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file && file.size > 0) {
-        const fileName = `${folder}/${Date.now()}_${i}_${file.name}`;
-        const arrayBuffer = await file.arrayBuffer();
-        
-        await c.env.BUCKET.put(fileName, arrayBuffer, {
-          httpMetadata: {
-            contentType: file.type,
-          },
-        });
-        
-        images.push(fileName);
+      const item = files[i];
+      if (typeof item !== 'string' && item) {
+        const file = item as File;
+        if (file.size > 0) {
+          const fileName = `${folder}/${Date.now()}_${i}_${file.name}`;
+          const arrayBuffer = await file.arrayBuffer();
+          
+          await c.env.BUCKET.put(fileName, arrayBuffer, {
+            httpMetadata: {
+              contentType: file.type,
+            },
+          });
+          
+          images.push(fileName);
+        }
       }
     }
     
@@ -304,8 +307,9 @@ app.put('/api/products/:id', async (c) => {
     ).bind(name, category, features, id).run();
     
     // 处理新上传的图片
-    const files = formData.getAll('images') as File[];
-    if (files.length > 0 && files[0].size > 0) {
+    const files = formData.getAll('images');
+    const firstFile = files[0];
+    if (files.length > 0 && typeof firstFile !== 'string' && firstFile && (firstFile as File).size > 0) {
       const product = await c.env.DB.prepare('SELECT folder FROM products WHERE id = ?').bind(id).first();
       const folder = (product as any)?.folder || 'default';
       
@@ -316,22 +320,25 @@ app.put('/api/products/:id', async (c) => {
       
       let displayOrder = (results[0] as any)?.count || 0;
       
-      for (const file of files) {
-        if (file && file.size > 0) {
-          const fileName = `${folder}/${Date.now()}_${displayOrder}_${file.name}`;
-          const arrayBuffer = await file.arrayBuffer();
-          
-          await c.env.BUCKET.put(fileName, arrayBuffer, {
-            httpMetadata: {
-              contentType: file.type,
-            },
-          });
-          
-          await c.env.DB.prepare(
-            'INSERT INTO product_images (product_id, image_url, display_order) VALUES (?, ?, ?)'
-          ).bind(id, fileName, displayOrder).run();
-          
-          displayOrder++;
+      for (const item of files) {
+        if (typeof item !== 'string' && item) {
+          const file = item as File;
+          if (file.size > 0) {
+            const fileName = `${folder}/${Date.now()}_${displayOrder}_${file.name}`;
+            const arrayBuffer = await file.arrayBuffer();
+            
+            await c.env.BUCKET.put(fileName, arrayBuffer, {
+              httpMetadata: {
+                contentType: file.type,
+              },
+            });
+            
+            await c.env.DB.prepare(
+              'INSERT INTO product_images (product_id, image_url, display_order) VALUES (?, ?, ?)'
+            ).bind(id, fileName, displayOrder).run();
+            
+            displayOrder++;
+          }
         }
       }
     }
