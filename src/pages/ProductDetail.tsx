@@ -62,8 +62,9 @@ const ProductDetail = () => {
   };
 
   const handleBackToProducts = () => {
-    // 设置标记，告诉首页需要滚动到产品区域
+    // 标记需要滚动到产品区域，并保持产品状态用于定位
     sessionStorage.setItem('shouldScrollToProducts', 'true');
+    // 保留 lastViewedProductId，让 Products 组件精确定位
     // 返回首页
     navigate("/");
   };

@@ -12,7 +12,6 @@ const Index = () => {
   useEffect(() => {
     // 检查是否有待滚动的目标section
     const scrollTarget = sessionStorage.getItem('scrollTarget');
-    const hasProductsState = sessionStorage.getItem('productsState');
     const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
     
     if (scrollTarget) {
@@ -33,36 +32,21 @@ const Index = () => {
         }
       }, 100);
     } else if (shouldScrollToProducts === 'true') {
-      // 从产品详情页返回，滚动到产品区域
-      sessionStorage.removeItem('shouldScrollToProducts');
-      
+      // 从产品详情页返回，让 Products 组件处理精确定位
+      // 这里不清除 shouldScrollToProducts，让 Products 组件来处理
+      // 先快速跳转到产品区域附近
       setTimeout(() => {
         const productsSection = document.getElementById("products");
         if (productsSection) {
-          const offset = 80;
+          const offset = 200; // 稍微靠上一点
           const elementPosition = productsSection.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
           window.scrollTo({
             top: offsetPosition,
-            behavior: "smooth",
+            behavior: "auto", // 使用 auto 立即跳转，让 Products 组件接管后续的平滑滚动
           });
         }
-      }, 100);
-    } else if (hasProductsState) {
-      // 如果有保存的产品浏览状态，先快速滚动到产品区域附近
-      // Products 组件会处理具体的产品位置定位
-      setTimeout(() => {
-        const productsSection = document.getElementById("products");
-        if (productsSection) {
-          const offset = 100; // 稍微多一点偏移
-          const elementPosition = productsSection.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - offset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "auto", // 使用 auto 立即跳转，不干扰后续的平滑滚动
-          });
-        }
-      }, 50); // 减少延迟，快速定位
+      }, 50);
     } else {
       // 没有目标section，正常滚动到顶部
       window.scrollTo(0, 0);

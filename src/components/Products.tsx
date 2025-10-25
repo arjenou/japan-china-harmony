@@ -202,37 +202,48 @@ const Products = () => {
 
   // 在产品列表加载完成后，滚动到之前浏览的产品位置
   useEffect(() => {
-    if (isRestoringState && !isLoading && products.length > 0 && !shouldScrollToProduct) {
-      const lastProductId = sessionStorage.getItem('lastViewedProductId');
-      if (lastProductId) {
-        // 标记开始滚动
-        setShouldScrollToProduct(true);
-        
-        // 等待 DOM 更新完成
-        setTimeout(() => {
-          const productElement = document.getElementById(`product-${lastProductId}`);
-          if (productElement) {
-            // 滚动到产品位置，使其在视口中居中
-            productElement.scrollIntoView({ 
-              behavior: "smooth", 
-              block: "center",
-              inline: "nearest"
-            });
-            
-            // 延迟清理，确保滚动完成
-            setTimeout(() => {
-              sessionStorage.removeItem('lastViewedProductId');
-              sessionStorage.removeItem('productsState');
-            }, 1000);
-          } else {
-            // 如果找不到产品元素，也要清理
+    // 检查是否需要滚动到特定产品
+    const shouldScroll = sessionStorage.getItem('shouldScrollToProducts');
+    const lastProductId = sessionStorage.getItem('lastViewedProductId');
+    
+    if (shouldScroll === 'true' && lastProductId && !isLoading && products.length > 0 && !shouldScrollToProduct) {
+      // 标记开始滚动
+      setShouldScrollToProduct(true);
+      
+      // 清除标记，防止重复触发
+      sessionStorage.removeItem('shouldScrollToProducts');
+      
+      // 等待 DOM 更新完成
+      setTimeout(() => {
+        const productElement = document.getElementById(`product-${lastProductId}`);
+        if (productElement) {
+          // 滚动到产品位置，使其在视口中居中偏上
+          const offset = 100; // 距离顶部的偏移量
+          const elementPosition = productElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+          
+          // 添加高亮效果
+          productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+          
+          // 延迟清理高亮和存储
+          setTimeout(() => {
+            productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
             sessionStorage.removeItem('lastViewedProductId');
             sessionStorage.removeItem('productsState');
-          }
-        }, 500); // 增加延迟确保渲染完成
-      }
+          }, 2000);
+        } else {
+          // 如果找不到产品元素，也要清理
+          sessionStorage.removeItem('lastViewedProductId');
+          sessionStorage.removeItem('productsState');
+        }
+      }, 300); // 等待渲染完成
     }
-  }, [isRestoringState, isLoading, products, shouldScrollToProduct]);
+  }, [isLoading, products, shouldScrollToProduct]);
 
   return (
     <section id="products" className="py-20 bg-muted/30">
@@ -358,7 +369,7 @@ const Products = () => {
                       sessionStorage.setItem('lastViewedProductId', product.id.toString());
                       navigate(`/product/${product.id}`);
                     }}
-                    className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden group cursor-pointer"
+                    className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-all duration-300 border border-border overflow-hidden group cursor-pointer"
                   >
                     <div className="aspect-square overflow-hidden bg-secondary/30 flex items-center justify-center">
                       <img 
