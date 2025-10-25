@@ -11,9 +11,8 @@ import Footer from "@/components/Footer";
 const Index = () => {
   // 使用 useLayoutEffect 在 DOM 更新后、浏览器绘制前执行
   useLayoutEffect(() => {
-    // 检查是否有待滚动的目标section
+    // 检查是否有待滚动的目标section（从导航菜单点击）
     const scrollTarget = sessionStorage.getItem('scrollTarget');
-    const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
     
     if (scrollTarget) {
       // 清除存储的目标
@@ -32,27 +31,8 @@ const Index = () => {
           });
         }
       }, 100);
-    } else if (shouldScrollToProducts === 'true') {
-      // 从产品详情页返回，立即粗略定位到产品区域
-      // 不等待数据加载，直接定位到产品section的位置
-      // Products 组件加载后会进行精确定位
-      const productsSection = document.getElementById("products");
-      if (productsSection) {
-        const navbarHeight = 80;
-        const extraSpace = 20;
-        const offset = navbarHeight + extraSpace;
-        
-        const elementRect = productsSection.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const elementTop = elementRect.top + scrollTop;
-        const scrollPosition = elementTop - offset;
-        
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: "auto",
-        });
-      }
     }
+    // 注意：从产品详情页返回的滚动恢复由 App.tsx 的 ScrollToTop 处理
   }, []);
 
   return (

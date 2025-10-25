@@ -200,42 +200,18 @@ const Products = () => {
   const totalProducts = data?.total || 0;
   const totalPages = data?.totalPages || 0;
 
-  // 在产品列表加载完成后，滚动到之前浏览的产品位置
+  // 在产品列表加载完成后，给之前浏览的商品添加高亮效果
   useLayoutEffect(() => {
-    // 检查是否需要滚动到特定产品
-    const shouldScroll = sessionStorage.getItem('shouldScrollToProducts');
+    // 检查是否有上次浏览的产品ID
     const lastProductId = sessionStorage.getItem('lastViewedProductId');
     
-    if (shouldScroll === 'true' && lastProductId && !isLoading && products.length > 0 && !shouldScrollToProduct) {
-      // 标记开始滚动
+    if (lastProductId && !isLoading && products.length > 0 && !shouldScrollToProduct) {
+      // 标记已处理
       setShouldScrollToProduct(true);
       
-      // 清除标记，防止重复触发
-      sessionStorage.removeItem('shouldScrollToProducts');
-      
-      // 立即执行精确定位
+      // 找到产品元素并添加高亮效果
       const productElement = document.getElementById(`product-${lastProductId}`);
       if (productElement) {
-        // 计算精确的滚动位置
-        // Navbar 高度约 80px，额外留 20px 间距
-        const navbarHeight = 80;
-        const extraSpace = 20;
-        const offset = navbarHeight + extraSpace;
-        
-        // 获取产品元素相对于文档顶部的位置
-        const elementRect = productElement.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const elementTop = elementRect.top + scrollTop;
-        
-        // 计算最终滚动位置
-        const scrollPosition = elementTop - offset;
-        
-        // 直接跳转到产品位置（不要滚动动画）
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: "auto",
-        });
-        
         // 添加高亮效果
         productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
         
@@ -375,6 +351,10 @@ const Products = () => {
                       };
                       sessionStorage.setItem('productsState', JSON.stringify(currentState));
                       sessionStorage.setItem('lastViewedProductId', product.id.toString());
+                      
+                      // 保存当前的精确滚动位置
+                      sessionStorage.setItem('savedScrollPosition', window.pageYOffset.toString());
+                      
                       navigate(`/product/${product.id}`);
                     }}
                     className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-all duration-300 border border-border overflow-hidden group cursor-pointer"
