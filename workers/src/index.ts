@@ -13,7 +13,8 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use('/*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma'],
+  exposeHeaders: ['X-Cache'],
 }));
 
 // 分类列表（日语）
