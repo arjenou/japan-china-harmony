@@ -12,11 +12,11 @@ import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight } f
 const API_BASE_URL = 'https://api.mono-grp.com';
 
 const categories = [
-  '瑜伽服',
-  '瑜伽器具',
-  '运动休闲类',
-  '功能性服装',
-  '包类',
+  'ヨガウェア',
+  'ヨガ用具',
+  'スポーツ・レジャー',
+  '機能性ウェア',
+  'バッグ類',
   '軍手と手袋',
   '雑貨類',
   'アニメ類'
