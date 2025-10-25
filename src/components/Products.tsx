@@ -213,8 +213,8 @@ const Products = () => {
       // 清除标记，防止重复触发
       sessionStorage.removeItem('shouldScrollToProducts');
       
-      // 等待 DOM 更新完成
-      setTimeout(() => {
+      // 使用 requestAnimationFrame 确保在浏览器下一帧渲染时执行
+      requestAnimationFrame(() => {
         const productElement = document.getElementById(`product-${lastProductId}`);
         if (productElement) {
           // 直接跳转到产品位置（不要滚动动画）
@@ -241,7 +241,7 @@ const Products = () => {
           sessionStorage.removeItem('lastViewedProductId');
           sessionStorage.removeItem('productsState');
         }
-      }, 200); // 缩短延迟，更快定位
+      });
     }
   }, [isLoading, products, shouldScrollToProduct]);
 

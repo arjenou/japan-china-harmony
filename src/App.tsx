@@ -13,12 +13,24 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// 路由变化时滚动到顶部的组件
+// 禁用浏览器默认的滚动恢复行为
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+
+// 路由变化时的滚动管理组件
 function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // 检查是否需要保持滚动位置（从产品详情页返回）
+    const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
+    
+    // 如果不需要定位到产品，则正常滚动到顶部
+    if (shouldScrollToProducts !== 'true') {
+      window.scrollTo(0, 0);
+    }
+    // 如果需要定位到产品，不执行滚动到顶部，让 Index 组件处理
   }, [pathname]);
 
   return null;

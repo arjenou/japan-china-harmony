@@ -32,23 +32,24 @@ const Index = () => {
         }
       }, 100);
     } else if (shouldScrollToProducts === 'true') {
-      // 从产品详情页返回，直接跳转到产品区域（不要滚动动画）
-      // 让 Products 组件处理精确定位到具体商品
-      // 不需要 setTimeout，立即执行
-      const productsSection = document.getElementById("products");
-      if (productsSection) {
-        const offset = 200;
-        const elementPosition = productsSection.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "auto", // 使用 auto 立即跳转，无动画
-        });
-      }
-    } else {
-      // 没有目标section，正常滚动到顶部
-      window.scrollTo(0, 0);
+      // 从产品详情页返回，等待 DOM 渲染后直接跳转到产品区域
+      // 使用 requestAnimationFrame 确保在浏览器下一帧渲染前执行
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const productsSection = document.getElementById("products");
+          if (productsSection) {
+            const offset = 200;
+            const elementPosition = productsSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "auto", // 使用 auto 立即跳转，无动画
+            });
+          }
+        }, 0);
+      });
     }
+    // 注意：不在这里执行 scrollTo(0, 0)，由 App.tsx 的 ScrollToTop 组件处理
   }, []);
 
   return (
