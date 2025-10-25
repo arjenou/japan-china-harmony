@@ -223,10 +223,23 @@ export default function Admin() {
       const result = await response.json();
 
       if (response.ok) {
+        // 立即更新 editingProduct 的图片列表，移除被删除的图片
+        if (editingProduct && editingProduct.images) {
+          const updatedImages = editingProduct.images.filter(img => img !== imageUrl);
+          setEditingProduct({
+            ...editingProduct,
+            images: updatedImages,
+            // 如果删除的是主图，更新主图为第一张剩余图片
+            image: editingProduct.image === imageUrl ? updatedImages[0] || '' : editingProduct.image
+          });
+        }
+        
         toast({
           title: '成功',
           description: '图片删除成功',
         });
+        
+        // 后台刷新产品列表，确保与服务器同步
         fetchProducts();
       } else {
         throw new Error(result.error || '删除失败');

@@ -414,6 +414,16 @@ app.delete('/api/products/:id/images/:imageUrl', async (c) => {
       'DELETE FROM product_images WHERE product_id = ? AND image_url = ?'
     ).bind(id, imageUrl).run();
     
+    // 清除相关缓存
+    const cache = caches.default;
+    const baseUrl = new URL(c.req.url).origin;
+    c.executionCtx.waitUntil(
+      Promise.all([
+        clearProductsCache(c),
+        cache.delete(`${baseUrl}/api/products/${id}`)
+      ])
+    );
+    
     return c.json({ 
       success: true, 
       message: 'Image deleted successfully' 
