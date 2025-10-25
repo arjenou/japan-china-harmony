@@ -178,16 +178,33 @@ async function clearProductsCache(c: any) {
   const baseUrl = new URL(c.req.url).origin;
   
   // 清除商品列表缓存（所有可能的分页和过滤组合）
-  // 注意：这是简化版本，实际可能需要更精细的缓存键管理
   const keys = [
     `${baseUrl}/api/products`,
     `${baseUrl}/api/products?page=1`,
     `${baseUrl}/api/products?page=1&pageSize=12`,
   ];
   
-  for (const key of keys) {
-    await cache.delete(key);
+  // 清除所有分类的缓存
+  for (const category of categories) {
+    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
+    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1`);
+    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1&pageSize=12`);
   }
+  
+  // 也清除中文分类（Admin页面使用的）
+  const chineseCategories = [
+    '瑜伽服', '瑜伽器具', '运动休闲类', '功能性服装', 
+    '包类', '軍手と手袋', '雑貨類', 'アニメ類'
+  ];
+  
+  for (const category of chineseCategories) {
+    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
+    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1`);
+    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1&pageSize=12`);
+  }
+  
+  // 批量删除缓存
+  await Promise.all(keys.map(key => cache.delete(key)));
 }
 
 // 创建商品

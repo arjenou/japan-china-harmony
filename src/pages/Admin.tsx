@@ -160,10 +160,15 @@ export default function Admin() {
       const result = await response.json();
 
       if (response.ok) {
+        // 立即从本地状态中移除该产品，提供即时反馈
+        setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
+        
         toast({
           title: '成功',
           description: '商品删除成功',
         });
+        
+        // 后台重新获取数据，确保与服务器同步
         fetchProducts();
       } else {
         throw new Error(result.error || '删除失败');
