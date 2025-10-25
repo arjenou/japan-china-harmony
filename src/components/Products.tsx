@@ -213,17 +213,27 @@ const Products = () => {
       // 清除标记，防止重复触发
       sessionStorage.removeItem('shouldScrollToProducts');
       
-      // 立即执行，不使用 requestAnimationFrame
+      // 立即执行精确定位
       const productElement = document.getElementById(`product-${lastProductId}`);
       if (productElement) {
-        // 直接跳转到产品位置（不要滚动动画）
-        const offset = 100; // 距离顶部的偏移量
-        const elementPosition = productElement.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        // 计算精确的滚动位置
+        // Navbar 高度约 80px，额外留 20px 间距
+        const navbarHeight = 80;
+        const extraSpace = 20;
+        const offset = navbarHeight + extraSpace;
         
+        // 获取产品元素相对于文档顶部的位置
+        const elementRect = productElement.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const elementTop = elementRect.top + scrollTop;
+        
+        // 计算最终滚动位置
+        const scrollPosition = elementTop - offset;
+        
+        // 直接跳转到产品位置（不要滚动动画）
         window.scrollTo({
-          top: offsetPosition,
-          behavior: "auto", // 使用 auto 立即跳转，无动画
+          top: scrollPosition,
+          behavior: "auto",
         });
         
         // 添加高亮效果

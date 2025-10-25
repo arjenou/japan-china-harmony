@@ -32,20 +32,9 @@ const Index = () => {
           });
         }
       }, 100);
-    } else if (shouldScrollToProducts === 'true') {
-      // 从产品详情页返回，等待 DOM 渲染后直接跳转到产品区域
-      // 立即执行，不等待
-      const productsSection = document.getElementById("products");
-      if (productsSection) {
-        const offset = 200;
-        const elementPosition = productsSection.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "auto", // 使用 auto 立即跳转，无动画
-        });
-      }
     }
+    // 注意：如果 shouldScrollToProducts === 'true'，不执行任何滚动
+    // 让 Products 组件完全负责精确定位到具体商品
   }, []);
 
   return (
