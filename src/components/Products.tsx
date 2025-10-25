@@ -30,26 +30,78 @@ const Products = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   
-  // 尝试从 sessionStorage 恢复之前的浏览状态
-  const getStoredState = () => {
-    const storedState = sessionStorage.getItem('productsState');
-    if (storedState) {
+  // 检查是否需要恢复状态（只在初始化时读取一次）
+  const [isRestoringState] = useState(() => {
+    return !!sessionStorage.getItem('productsState');
+  });
+  
+  // 初始化状态（从 sessionStorage 恢复或使用默认值）
+  const [searchInput, setSearchInput] = useState(() => {
+    const stored = sessionStorage.getItem('productsState');
+    if (stored) {
       try {
-        return JSON.parse(storedState);
+        const state = JSON.parse(stored);
+        return state.searchQuery || "";
       } catch (e) {
-        return null;
+        return "";
       }
     }
-    return null;
-  };
+    return "";
+  });
   
-  const storedState = getStoredState();
-  const [searchInput, setSearchInput] = useState(storedState?.searchQuery || "");
-  const [searchQuery, setSearchQuery] = useState(storedState?.searchQuery || "");
-  const [selectedCategory, setSelectedCategory] = useState(storedState?.category || t('products.categories.all'));
-  const [currentPage, setCurrentPage] = useState(storedState?.page || 1);
-  const [itemsPerPage, setItemsPerPage] = useState(storedState?.itemsPerPage || 12);
-  const [shouldScrollToProduct, setShouldScrollToProduct] = useState(!!storedState);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const stored = sessionStorage.getItem('productsState');
+    if (stored) {
+      try {
+        const state = JSON.parse(stored);
+        return state.searchQuery || "";
+      } catch (e) {
+        return "";
+      }
+    }
+    return "";
+  });
+  
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    const stored = sessionStorage.getItem('productsState');
+    if (stored) {
+      try {
+        const state = JSON.parse(stored);
+        return state.category || t('products.categories.all');
+      } catch (e) {
+        return t('products.categories.all');
+      }
+    }
+    return t('products.categories.all');
+  });
+  
+  const [currentPage, setCurrentPage] = useState(() => {
+    const stored = sessionStorage.getItem('productsState');
+    if (stored) {
+      try {
+        const state = JSON.parse(stored);
+        return state.page || 1;
+      } catch (e) {
+        return 1;
+      }
+    }
+    return 1;
+  });
+  
+  const [itemsPerPage, setItemsPerPage] = useState(() => {
+    const stored = sessionStorage.getItem('productsState');
+    if (stored) {
+      try {
+        const state = JSON.parse(stored);
+        return state.itemsPerPage || 12;
+      } catch (e) {
+        return 12;
+      }
+    }
+    return 12;
+  });
+  
+  const [shouldScrollToProduct, setShouldScrollToProduct] = useState(false);
   
   const categories = [
     t('products.categories.all'),
@@ -63,22 +115,27 @@ const Products = () => {
     t('products.categories.anime'),
   ];
   
-  // 当语言改变时，重置选中的分类为当前语言的"全部"
+  // 当语言改变时，重置选中的分类为当前语言的"全部"（但不在恢复状态时执行）
   useEffect(() => {
-    if (!storedState) {
+    if (!isRestoringState) {
       setSelectedCategory(t('products.categories.all'));
     }
-  }, [language]);
+  }, [language, isRestoringState]);
   
-  // 搜索防抖 - 输入停止500ms后自动搜索
+  // 搜索防抖 - 输入停止500ms后自动搜索（但不在恢复状态时重置页码）
   useEffect(() => {
+    if (isRestoringState) {
+      // 如果正在恢复状态，跳过防抖逻辑
+      return;
+    }
+    
     const timer = setTimeout(() => {
       setSearchQuery(searchInput);
       setCurrentPage(1);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, isRestoringState]);
 
   // 使用 React Query 获取产品数据（带缓存）
   const { data, isLoading, error } = useQuery({
@@ -145,9 +202,12 @@ const Products = () => {
 
   // 在产品列表加载完成后，滚动到之前浏览的产品位置
   useEffect(() => {
-    if (shouldScrollToProduct && !isLoading && products.length > 0) {
+    if (isRestoringState && !isLoading && products.length > 0 && !shouldScrollToProduct) {
       const lastProductId = sessionStorage.getItem('lastViewedProductId');
       if (lastProductId) {
+        // 标记开始滚动
+        setShouldScrollToProduct(true);
+        
         // 等待 DOM 更新完成
         setTimeout(() => {
           const productElement = document.getElementById(`product-${lastProductId}`);
@@ -158,15 +218,21 @@ const Products = () => {
               block: "center",
               inline: "nearest"
             });
-            // 清理状态
+            
+            // 延迟清理，确保滚动完成
+            setTimeout(() => {
+              sessionStorage.removeItem('lastViewedProductId');
+              sessionStorage.removeItem('productsState');
+            }, 1000);
+          } else {
+            // 如果找不到产品元素，也要清理
             sessionStorage.removeItem('lastViewedProductId');
             sessionStorage.removeItem('productsState');
-            setShouldScrollToProduct(false);
           }
-        }, 300); // 增加延迟确保渲染完成
+        }, 500); // 增加延迟确保渲染完成
       }
     }
-  }, [shouldScrollToProduct, isLoading, products]);
+  }, [isRestoringState, isLoading, products, shouldScrollToProduct]);
 
   return (
     <section id="products" className="py-20 bg-muted/30">

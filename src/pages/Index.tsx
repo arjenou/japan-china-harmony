@@ -32,20 +32,20 @@ const Index = () => {
         }
       }, 100);
     } else if (hasProductsState) {
-      // 如果有保存的产品浏览状态，滚动到产品区域
-      // Products 组件会处理具体的产品位置恢复
+      // 如果有保存的产品浏览状态，先快速滚动到产品区域附近
+      // Products 组件会处理具体的产品位置定位
       setTimeout(() => {
         const productsSection = document.getElementById("products");
         if (productsSection) {
-          const offset = 80;
+          const offset = 100; // 稍微多一点偏移
           const elementPosition = productsSection.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
           window.scrollTo({
             top: offsetPosition,
-            behavior: "auto", // 使用 auto 而不是 smooth，让后续的产品定位更准确
+            behavior: "auto", // 使用 auto 立即跳转，不干扰后续的平滑滚动
           });
         }
-      }, 100);
+      }, 50); // 减少延迟，快速定位
     } else {
       // 没有目标section，正常滚动到顶部
       window.scrollTo(0, 0);
