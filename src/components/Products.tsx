@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
@@ -201,7 +201,7 @@ const Products = () => {
   const totalPages = data?.totalPages || 0;
 
   // 在产品列表加载完成后，滚动到之前浏览的产品位置
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 检查是否需要滚动到特定产品
     const shouldScroll = sessionStorage.getItem('shouldScrollToProducts');
     const lastProductId = sessionStorage.getItem('lastViewedProductId');
@@ -213,35 +213,33 @@ const Products = () => {
       // 清除标记，防止重复触发
       sessionStorage.removeItem('shouldScrollToProducts');
       
-      // 使用 requestAnimationFrame 确保在浏览器下一帧渲染时执行
-      requestAnimationFrame(() => {
-        const productElement = document.getElementById(`product-${lastProductId}`);
-        if (productElement) {
-          // 直接跳转到产品位置（不要滚动动画）
-          const offset = 100; // 距离顶部的偏移量
-          const elementPosition = productElement.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - offset;
-          
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "auto", // 使用 auto 立即跳转，无动画
-          });
-          
-          // 添加高亮效果
-          productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-          
-          // 延迟清理高亮和存储
-          setTimeout(() => {
-            productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-            sessionStorage.removeItem('lastViewedProductId');
-            sessionStorage.removeItem('productsState');
-          }, 2000);
-        } else {
-          // 如果找不到产品元素，也要清理
+      // 立即执行，不使用 requestAnimationFrame
+      const productElement = document.getElementById(`product-${lastProductId}`);
+      if (productElement) {
+        // 直接跳转到产品位置（不要滚动动画）
+        const offset = 100; // 距离顶部的偏移量
+        const elementPosition = productElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "auto", // 使用 auto 立即跳转，无动画
+        });
+        
+        // 添加高亮效果
+        productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+        
+        // 延迟清理高亮和存储
+        setTimeout(() => {
+          productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
           sessionStorage.removeItem('lastViewedProductId');
           sessionStorage.removeItem('productsState');
-        }
-      });
+        }, 2000);
+      } else {
+        // 如果找不到产品元素，也要清理
+        sessionStorage.removeItem('lastViewedProductId');
+        sessionStorage.removeItem('productsState');
+      }
     }
   }, [isLoading, products, shouldScrollToProduct]);
 

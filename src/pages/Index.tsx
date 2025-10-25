@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Philosophy from "@/components/Philosophy";
@@ -9,7 +9,8 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
 const Index = () => {
-  useEffect(() => {
+  // 使用 useLayoutEffect 在 DOM 更新后、浏览器绘制前执行
+  useLayoutEffect(() => {
     // 检查是否有待滚动的目标section
     const scrollTarget = sessionStorage.getItem('scrollTarget');
     const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
@@ -33,23 +34,18 @@ const Index = () => {
       }, 100);
     } else if (shouldScrollToProducts === 'true') {
       // 从产品详情页返回，等待 DOM 渲染后直接跳转到产品区域
-      // 使用 requestAnimationFrame 确保在浏览器下一帧渲染前执行
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const productsSection = document.getElementById("products");
-          if (productsSection) {
-            const offset = 200;
-            const elementPosition = productsSection.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - offset;
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "auto", // 使用 auto 立即跳转，无动画
-            });
-          }
-        }, 0);
-      });
+      // 立即执行，不等待
+      const productsSection = document.getElementById("products");
+      if (productsSection) {
+        const offset = 200;
+        const elementPosition = productsSection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "auto", // 使用 auto 立即跳转，无动画
+        });
+      }
     }
-    // 注意：不在这里执行 scrollTo(0, 0)，由 App.tsx 的 ScrollToTop 组件处理
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +22,7 @@ if ('scrollRestoration' in window.history) {
 function ScrollToTop() {
   const { pathname } = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 检查是否需要保持滚动位置（从产品详情页返回）
     const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
     
