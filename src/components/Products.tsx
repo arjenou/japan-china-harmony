@@ -217,14 +217,14 @@ const Products = () => {
       setTimeout(() => {
         const productElement = document.getElementById(`product-${lastProductId}`);
         if (productElement) {
-          // 滚动到产品位置，使其在视口中居中偏上
+          // 直接跳转到产品位置（不要滚动动画）
           const offset = 100; // 距离顶部的偏移量
           const elementPosition = productElement.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
           
           window.scrollTo({
             top: offsetPosition,
-            behavior: "smooth",
+            behavior: "auto", // 使用 auto 立即跳转，无动画
           });
           
           // 添加高亮效果
@@ -241,7 +241,7 @@ const Products = () => {
           sessionStorage.removeItem('lastViewedProductId');
           sessionStorage.removeItem('productsState');
         }
-      }, 300); // 等待渲染完成
+      }, 200); // 缩短延迟，更快定位
     }
   }, [isLoading, products, shouldScrollToProduct]);
 
