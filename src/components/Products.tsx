@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Select,
@@ -215,8 +216,16 @@ const Products = () => {
 
             {/* Products Grid */}
             {isLoading ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">{t('products.loading')}</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                {Array.from({ length: itemsPerPage }).map((_, index) => (
+                  <div key={index} className="bg-card rounded-xl shadow-card border border-border overflow-hidden">
+                    <Skeleton className="aspect-square w-full" />
+                    <div className="p-3 md:p-4 space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-12">

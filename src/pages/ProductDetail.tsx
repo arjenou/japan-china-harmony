@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -93,8 +94,51 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-muted-foreground">読み込み中...</p>
+        <div className="container mx-auto px-4 py-24">
+          <Skeleton className="h-10 w-40 mb-6" />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* Image Gallery Skeleton */}
+            <div className="space-y-4">
+              <Skeleton className="aspect-square w-full rounded-xl" />
+              <div className="grid grid-cols-5 gap-2">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Skeleton key={index} className="aspect-square rounded-lg" />
+                ))}
+              </div>
+            </div>
+            
+            {/* Product Info Skeleton */}
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-32 rounded-full" />
+                <Skeleton className="h-10 w-3/4" />
+                <Skeleton className="h-10 w-1/2" />
+              </div>
+              
+              <Skeleton className="h-px w-full" />
+              
+              <div className="space-y-4">
+                <Skeleton className="h-7 w-40" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
+              </div>
+              
+              <Skeleton className="h-px w-full" />
+              
+              <div className="space-y-4">
+                <Skeleton className="h-7 w-40" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-10 w-40" />
+              </div>
+              
+              <Skeleton className="h-32 w-full rounded-lg" />
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
