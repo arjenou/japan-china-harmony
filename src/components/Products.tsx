@@ -360,11 +360,11 @@ const Products = () => {
                     }}
                     className="bg-card rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden group cursor-pointer"
                   >
-                    <div className="aspect-square overflow-hidden bg-secondary/30">
+                    <div className="aspect-square overflow-hidden bg-secondary/30 flex items-center justify-center">
                       <img 
                         src={product.image} 
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-smooth"
                       />
                     </div>
                     <div className="p-3 md:p-4">

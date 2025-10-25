@@ -376,11 +376,13 @@ export default function Admin() {
                     <div className="grid grid-cols-4 gap-2 mt-2">
                       {editingProduct.images.map((img, index) => (
                         <div key={index} className="relative group">
-                          <img
-                            src={`${API_BASE_URL}/api/images/${img}`}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-24 object-cover rounded"
-                          />
+                          <div className="w-full h-24 bg-secondary/30 rounded flex items-center justify-center">
+                            <img
+                              src={`${API_BASE_URL}/api/images/${img}`}
+                              alt={`Product ${index + 1}`}
+                              className="max-w-full max-h-full object-contain"
+                            />
+                          </div>
                           <Button
                             type="button"
                             variant="destructive"
@@ -455,12 +457,12 @@ export default function Admin() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product) => (
               <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-video relative bg-gray-100">
+                <div className="aspect-video relative bg-gray-100 flex items-center justify-center">
                   {product.image ? (
                     <img
                       src={`${API_BASE_URL}/api/images/${product.image}`}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

@@ -168,11 +168,11 @@ const ProductDetail = () => {
           {/* Image Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-secondary/30 rounded-xl overflow-hidden group">
+            <div className="relative aspect-square bg-secondary/30 rounded-xl overflow-hidden group flex items-center justify-center">
               <img
                 src={currentImage}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               
               {/* Navigation Arrows */}
@@ -208,7 +208,7 @@ const ProductDetail = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all flex items-center justify-center bg-secondary/30 ${
                       currentImageIndex === index
                         ? "border-primary shadow-md"
                         : "border-border hover:border-primary/50"
@@ -217,7 +217,7 @@ const ProductDetail = () => {
                     <img
                       src={`${API_BASE_URL}/api/images/${img}`}
                       alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 ))}
