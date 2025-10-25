@@ -62,18 +62,10 @@ const ProductDetail = () => {
   };
 
   const handleBackToProducts = () => {
-    // 直接返回首页，Products 组件会处理状态恢复和滚动
+    // 设置标记，告诉首页需要滚动到产品区域
+    sessionStorage.setItem('shouldScrollToProducts', 'true');
+    // 返回首页
     navigate("/");
-    // 如果没有保存的状态，则滚动到产品区域
-    const hasStoredState = sessionStorage.getItem('productsState');
-    if (!hasStoredState) {
-      setTimeout(() => {
-        const productsSection = document.getElementById("products");
-        if (productsSection) {
-          productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 100);
-    }
   };
 
   if (isLoading) {
