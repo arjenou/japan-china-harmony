@@ -12,6 +12,7 @@ const Index = () => {
   useEffect(() => {
     // 检查是否有待滚动的目标section
     const scrollTarget = sessionStorage.getItem('scrollTarget');
+    const hasProductsState = sessionStorage.getItem('productsState');
     
     if (scrollTarget) {
       // 清除存储的目标
@@ -27,6 +28,21 @@ const Index = () => {
           window.scrollTo({
             top: offsetPosition,
             behavior: "smooth",
+          });
+        }
+      }, 100);
+    } else if (hasProductsState) {
+      // 如果有保存的产品浏览状态，滚动到产品区域
+      // Products 组件会处理具体的产品位置恢复
+      setTimeout(() => {
+        const productsSection = document.getElementById("products");
+        if (productsSection) {
+          const offset = 80;
+          const elementPosition = productsSection.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "auto", // 使用 auto 而不是 smooth，让后续的产品定位更准确
           });
         }
       }, 100);

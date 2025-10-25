@@ -29,11 +29,27 @@ const API_BASE_URL = 'https://api.mono-grp.com';
 const Products = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(t('products.categories.all'));
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  
+  // 尝试从 sessionStorage 恢复之前的浏览状态
+  const getStoredState = () => {
+    const storedState = sessionStorage.getItem('productsState');
+    if (storedState) {
+      try {
+        return JSON.parse(storedState);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+  
+  const storedState = getStoredState();
+  const [searchInput, setSearchInput] = useState(storedState?.searchQuery || "");
+  const [searchQuery, setSearchQuery] = useState(storedState?.searchQuery || "");
+  const [selectedCategory, setSelectedCategory] = useState(storedState?.category || t('products.categories.all'));
+  const [currentPage, setCurrentPage] = useState(storedState?.page || 1);
+  const [itemsPerPage, setItemsPerPage] = useState(storedState?.itemsPerPage || 12);
+  const [shouldScrollToProduct, setShouldScrollToProduct] = useState(!!storedState);
   
   const categories = [
     t('products.categories.all'),
@@ -49,7 +65,9 @@ const Products = () => {
   
   // 当语言改变时，重置选中的分类为当前语言的"全部"
   useEffect(() => {
-    setSelectedCategory(t('products.categories.all'));
+    if (!storedState) {
+      setSelectedCategory(t('products.categories.all'));
+    }
   }, [language]);
   
   // 搜索防抖 - 输入停止500ms后自动搜索
@@ -124,6 +142,31 @@ const Products = () => {
   const products = data?.products || [];
   const totalProducts = data?.total || 0;
   const totalPages = data?.totalPages || 0;
+
+  // 在产品列表加载完成后，滚动到之前浏览的产品位置
+  useEffect(() => {
+    if (shouldScrollToProduct && !isLoading && products.length > 0) {
+      const lastProductId = sessionStorage.getItem('lastViewedProductId');
+      if (lastProductId) {
+        // 等待 DOM 更新完成
+        setTimeout(() => {
+          const productElement = document.getElementById(`product-${lastProductId}`);
+          if (productElement) {
+            // 滚动到产品位置，使其在视口中居中
+            productElement.scrollIntoView({ 
+              behavior: "smooth", 
+              block: "center",
+              inline: "nearest"
+            });
+            // 清理状态
+            sessionStorage.removeItem('lastViewedProductId');
+            sessionStorage.removeItem('productsState');
+            setShouldScrollToProduct(false);
+          }
+        }, 300); // 增加延迟确保渲染完成
+      }
+    }
+  }, [shouldScrollToProduct, isLoading, products]);
 
   return (
     <section id="products" className="py-20 bg-muted/30">
@@ -238,6 +281,14 @@ const Products = () => {
                     key={product.id}
                     id={`product-${product.id}`}
                     onClick={() => {
+                      // 保存当前浏览状态和产品ID
+                      const currentState = {
+                        page: currentPage,
+                        itemsPerPage: itemsPerPage,
+                        category: selectedCategory,
+                        searchQuery: searchQuery,
+                      };
+                      sessionStorage.setItem('productsState', JSON.stringify(currentState));
                       sessionStorage.setItem('lastViewedProductId', product.id.toString());
                       navigate(`/product/${product.id}`);
                     }}
