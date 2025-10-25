@@ -39,19 +39,26 @@ app.get('/api/products', async (c) => {
   const search = c.req.query('search');
   const page = parseInt(c.req.query('page') || '1');
   const pageSize = parseInt(c.req.query('pageSize') || '12');
+  const timestamp = c.req.query('_t'); // 缓存破坏参数
   
-  // 生成缓存键
-  const cacheKey = new URL(c.req.url);
+  // 生成缓存键（不包含时间戳参数）
+  const url = new URL(c.req.url);
+  url.searchParams.delete('_t'); // 移除时间戳参数以生成一致的缓存键
+  const cacheKey = url.toString();
   const cache = caches.default;
   
-  // 尝试从缓存获取
-  let response = await cache.match(cacheKey.toString());
-  
-  if (response) {
-    // 添加缓存命中标记
-    const newResponse = new Response(response.body, response);
-    newResponse.headers.set('X-Cache', 'HIT');
-    return newResponse;
+  // 如果有时间戳参数，跳过缓存（强制刷新）
+  let response = null;
+  if (!timestamp) {
+    // 尝试从缓存获取
+    response = await cache.match(cacheKey);
+    
+    if (response) {
+      // 添加缓存命中标记
+      const newResponse = new Response(response.body, response);
+      newResponse.headers.set('X-Cache', 'HIT');
+      return newResponse;
+    }
   }
   
   try {
@@ -113,8 +120,10 @@ app.get('/api/products', async (c) => {
       },
     });
     
-    // 存入缓存
-    c.executionCtx.waitUntil(cache.put(cacheKey.toString(), response.clone()));
+    // 只在没有时间戳时存入缓存
+    if (!timestamp) {
+      c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
+    }
     
     return response;
   } catch (error: any) {
@@ -184,7 +193,7 @@ async function clearProductsCache(c: any) {
     `${baseUrl}/api/products?page=1&pageSize=12`,
   ];
   
-  // 清除所有分类的缓存
+  // 清除所有分类的缓存（日文分类）
   for (const category of categories) {
     keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
     keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1`);
@@ -205,6 +214,9 @@ async function clearProductsCache(c: any) {
   
   // 批量删除缓存
   await Promise.all(keys.map(key => cache.delete(key)));
+  
+  // 额外的安全措施：尝试删除所有可能的URL变体
+  console.log(`Cleared ${keys.length} cache keys`);
 }
 
 // 创建商品

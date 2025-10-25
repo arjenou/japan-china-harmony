@@ -60,7 +60,17 @@ export default function Admin() {
         ? `${API_BASE_URL}/api/products?category=${encodeURIComponent(selectedCategory)}`
         : `${API_BASE_URL}/api/products`;
       
-      const response = await fetch(url);
+      // 添加时间戳参数强制绕过缓存
+      const cacheBuster = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+      
+      const response = await fetch(cacheBuster, {
+        // 强制不使用缓存
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
       const data = await response.json();
       setProducts(data.products || []);
     } catch (error) {
