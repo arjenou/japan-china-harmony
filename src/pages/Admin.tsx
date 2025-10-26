@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { compressImages, formatFileSize } from '@/lib/imageCompressor';
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
@@ -54,6 +55,8 @@ export default function Admin() {
     folder: ''
   });
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     fetchProducts();
@@ -133,9 +136,43 @@ export default function Admin() {
         formDataToSend.append('folder', formData.folder || formData.name.replace(/[^a-zA-Z0-9]/g, '_'));
       }
 
-      if (selectedFiles) {
-        for (let i = 0; i < selectedFiles.length; i++) {
-          formDataToSend.append('images', selectedFiles[i]);
+      // 压缩图片
+      if (selectedFiles && selectedFiles.length > 0) {
+        setIsCompressing(true);
+        setCompressionProgress({ current: 0, total: selectedFiles.length });
+        
+        toast({
+          title: '正在压缩图片',
+          description: `共 ${selectedFiles.length} 张图片需要处理...`,
+        });
+
+        const filesArray = Array.from(selectedFiles);
+        const compressedFiles = await compressImages(
+          filesArray,
+          {
+            maxWidth: 1920,
+            maxHeight: 1920,
+            quality: 0.85,
+            maxSize: 500 * 1024, // 500KB
+          },
+          (current, total) => {
+            setCompressionProgress({ current, total });
+          }
+        );
+
+        setIsCompressing(false);
+
+        // 计算总大小
+        const originalSize = filesArray.reduce((sum, f) => sum + f.size, 0);
+        const compressedSize = compressedFiles.reduce((sum, f) => sum + f.size, 0);
+
+        toast({
+          title: '图片压缩完成',
+          description: `原始大小: ${formatFileSize(originalSize)} → 压缩后: ${formatFileSize(compressedSize)}`,
+        });
+
+        for (let i = 0; i < compressedFiles.length; i++) {
+          formDataToSend.append('images', compressedFiles[i]);
         }
       }
 
@@ -171,6 +208,8 @@ export default function Admin() {
       });
     } finally {
       setIsLoading(false);
+      setIsCompressing(false);
+      setCompressionProgress({ current: 0, total: 0 });
     }
   };
 
@@ -538,14 +577,40 @@ export default function Admin() {
                   </div>
                 )}
 
+                {isCompressing && (
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-900">正在压缩图片...</span>
+                      <span className="text-sm text-blue-700">
+                        {compressionProgress.current} / {compressionProgress.total}
+                      </span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${(compressionProgress.current / compressionProgress.total) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" disabled={isLoading} className="flex-1">
-                    {isLoading ? '处理中...' : editingProduct ? '更新商品' : '创建商品'}
+                  <Button type="submit" disabled={isLoading || isCompressing} className="flex-1">
+                    {isCompressing 
+                      ? '压缩中...' 
+                      : isLoading 
+                      ? '处理中...' 
+                      : editingProduct 
+                      ? '更新商品' 
+                      : '创建商品'}
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => handleDialogClose(false)}
+                    disabled={isLoading || isCompressing}
                   >
                     取消
                   </Button>

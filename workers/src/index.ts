@@ -232,6 +232,9 @@ async function clearProductsCache(c: any) {
   console.log(`Cleared ${keys.length} cache keys`);
 }
 
+// 图片文件大小限制（5MB）
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
 // 创建商品
 app.post('/api/products', async (c) => {
   try {
@@ -254,6 +257,18 @@ app.post('/api/products', async (c) => {
       if (typeof item !== 'string' && item) {
         const file = item as File;
         if (file.size > 0) {
+          // 验证文件大小
+          if (file.size > MAX_IMAGE_SIZE) {
+            return c.json({ 
+              error: `图片 "${file.name}" 太大。文件大小: ${(file.size / 1024 / 1024).toFixed(2)}MB，最大允许: ${MAX_IMAGE_SIZE / 1024 / 1024}MB` 
+            }, 400);
+          }
+          
+          // 验证文件类型
+          if (!file.type.startsWith('image/')) {
+            return c.json({ error: `文件 "${file.name}" 不是有效的图片格式` }, 400);
+          }
+          
           const fileName = `${folder}/${Date.now()}_${i}_${file.name}`;
           const arrayBuffer = await file.arrayBuffer();
           
@@ -336,6 +351,18 @@ app.put('/api/products/:id', async (c) => {
         if (typeof item !== 'string' && item) {
           const file = item as File;
           if (file.size > 0) {
+            // 验证文件大小
+            if (file.size > MAX_IMAGE_SIZE) {
+              return c.json({ 
+                error: `图片 "${file.name}" 太大。文件大小: ${(file.size / 1024 / 1024).toFixed(2)}MB，最大允许: ${MAX_IMAGE_SIZE / 1024 / 1024}MB` 
+              }, 400);
+            }
+            
+            // 验证文件类型
+            if (!file.type.startsWith('image/')) {
+              return c.json({ error: `文件 "${file.name}" 不是有效的图片格式` }, 400);
+            }
+            
             const fileName = `${folder}/${Date.now()}_${displayOrder}_${file.name}`;
             const arrayBuffer = await file.arrayBuffer();
             
