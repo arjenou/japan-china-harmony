@@ -168,17 +168,8 @@ const Products = () => {
         params.append('search', searchQuery.trim());
       }
       
-      // 添加时间戳参数以绕过CDN缓存（每分钟更新一次）
-      const cacheKey = Math.floor(Date.now() / 60000); // 每分钟一个新的缓存键
-      params.append('_t', cacheKey.toString());
-      
-      const response = await fetch(`${API_BASE_URL}/api/products?${params}`, {
-        // 强制不使用浏览器缓存
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      });
+      // 移除强制刷新逻辑，允许使用HTTP缓存
+      const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch products');
@@ -203,8 +194,8 @@ const Products = () => {
         totalPages: data.totalPages || 0,
       };
     },
-    staleTime: 1 * 60 * 1000, // 1分钟内数据被视为新鲜（从5分钟改为1分钟）
-    gcTime: 5 * 60 * 1000, // 缓存保留5分钟（从10分钟改为5分钟）
+    staleTime: 5 * 60 * 1000, // 5分钟内数据被视为新鲜
+    gcTime: 30 * 60 * 1000, // 缓存保留30分钟
   });
 
   const products = data?.products || [];
@@ -378,6 +369,7 @@ const Products = () => {
                       <img 
                         src={product.image} 
                         alt={product.name}
+                        loading="lazy"
                         className="w-full h-full object-contain group-hover:scale-105 transition-smooth"
                       />
                     </div>

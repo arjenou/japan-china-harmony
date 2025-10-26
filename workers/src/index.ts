@@ -40,26 +40,19 @@ app.get('/api/products', async (c) => {
   const search = c.req.query('search');
   const page = parseInt(c.req.query('page') || '1');
   const pageSize = parseInt(c.req.query('pageSize') || '12');
-  const timestamp = c.req.query('_t'); // 缓存破坏参数
   
-  // 生成缓存键（不包含时间戳参数）
-  const url = new URL(c.req.url);
-  url.searchParams.delete('_t'); // 移除时间戳参数以生成一致的缓存键
-  const cacheKey = url.toString();
+  // 生成缓存键
+  const cacheKey = new URL(c.req.url).toString();
   const cache = caches.default;
   
-  // 如果有时间戳参数，跳过缓存（强制刷新）
-  let response = null;
-  if (!timestamp) {
-    // 尝试从缓存获取
-    response = await cache.match(cacheKey);
-    
-    if (response) {
-      // 添加缓存命中标记
-      const newResponse = new Response(response.body, response);
-      newResponse.headers.set('X-Cache', 'HIT');
-      return newResponse;
-    }
+  // 尝试从缓存获取
+  let response = await cache.match(cacheKey);
+  
+  if (response) {
+    // 添加缓存命中标记
+    const newResponse = new Response(response.body, response);
+    newResponse.headers.set('X-Cache', 'HIT');
+    return newResponse;
   }
   
   try {
@@ -68,12 +61,12 @@ app.get('/api/products', async (c) => {
     const params: any[] = [];
     
     if (category && category !== '全て') {
-      whereConditions.push('category = ?');
+      whereConditions.push('p.category = ?');
       params.push(category);
     }
     
     if (search) {
-      whereConditions.push('name LIKE ?');
+      whereConditions.push('p.name LIKE ?');
       params.push(`%${search}%`);
     }
     
@@ -82,52 +75,77 @@ app.get('/api/products', async (c) => {
       : '';
     
     // 获取总数
-    const countQuery = `SELECT COUNT(*) as total FROM products${whereClause}`;
+    const countQuery = `SELECT COUNT(*) as total FROM products p${whereClause}`;
     const countResult = await c.env.DB.prepare(countQuery).bind(...params).first();
     const total = (countResult as any)?.total || 0;
     
     // 计算偏移量
     const offset = (page - 1) * pageSize;
     
-    // 获取分页数据
-    const query = `SELECT * FROM products${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    // 优化：使用JOIN一次性获取产品和主图（只获取第一张图片）
+    // 使用子查询获取每个产品的第一张图片
+    const query = `
+      SELECT 
+        p.*,
+        (SELECT pi.image_url 
+         FROM product_images pi 
+         WHERE pi.product_id = p.id 
+         ORDER BY pi.display_order 
+         LIMIT 1) as main_image,
+        (SELECT GROUP_CONCAT(pi2.image_url)
+         FROM product_images pi2
+         WHERE pi2.product_id = p.id
+         ORDER BY pi2.display_order) as all_images
+      FROM products p
+      ${whereClause}
+      ORDER BY p.created_at DESC 
+      LIMIT ? OFFSET ?
+    `;
+    
     const { results } = await c.env.DB.prepare(query)
       .bind(...params, pageSize, offset)
       .all();
     
-    // 获取每个商品的图片
-    for (const product of results) {
-      const images = await c.env.DB.prepare(
-        'SELECT image_url FROM product_images WHERE product_id = ? ORDER BY display_order'
-      ).bind(product.id).all();
-      
-      (product as any).images = images.results.map((img: any) => img.image_url);
-    }
+    // 处理结果：列表接口只返回主图
+    const products = results.map((product: any) => {
+      const images = product.all_images ? product.all_images.split(',') : [];
+      return {
+        id: product.id,
+        name: product.name,
+        image: product.main_image || (images[0] || ''),
+        category: product.category,
+        folder: product.folder,
+        features: product.features,
+        created_at: product.created_at,
+        // 列表接口只返回主图，减少数据传输
+        images: [product.main_image || (images[0] || '')],
+      };
+    });
     
     const responseData = { 
-      products: results,
+      products,
       total,
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize)
     };
     
-    // 创建响应并设置缓存头
+    // 创建响应并设置优化的缓存头
+    // 使用 stale-while-revalidate 策略：过期后继续使用缓存，同时在后台更新
     response = new Response(JSON.stringify(responseData), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300, s-maxage=600', // 客户端5分钟，CDN10分钟
+        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600', // CDN缓存30分钟，过期后1小时内可继续使用
         'X-Cache': 'MISS',
       },
     });
     
-    // 只在没有时间戳时存入缓存
-    if (!timestamp) {
-      c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
-    }
+    // 存入缓存
+    c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
     
     return response;
   } catch (error: any) {
+    console.error('Error fetching products:', error);
     return c.json({ error: error.message }, 500);
   }
 });
@@ -137,11 +155,11 @@ app.get('/api/products/:id', async (c) => {
   const id = c.req.param('id');
   
   // 生成缓存键
-  const cacheKey = new URL(c.req.url);
+  const cacheKey = new URL(c.req.url).toString();
   const cache = caches.default;
   
   // 尝试从缓存获取
-  let response = await cache.match(cacheKey.toString());
+  let response = await cache.match(cacheKey);
   
   if (response) {
     const newResponse = new Response(response.body, response);
@@ -150,34 +168,52 @@ app.get('/api/products/:id', async (c) => {
   }
   
   try {
-    const product = await c.env.DB.prepare(
-      'SELECT * FROM products WHERE id = ?'
-    ).bind(id).first();
+    // 优化：使用JOIN一次性获取产品和所有图片
+    const query = `
+      SELECT 
+        p.*,
+        GROUP_CONCAT(pi.image_url ORDER BY pi.display_order) as all_images
+      FROM products p
+      LEFT JOIN product_images pi ON p.id = pi.product_id
+      WHERE p.id = ?
+      GROUP BY p.id
+    `;
+    
+    const product = await c.env.DB.prepare(query).bind(id).first();
     
     if (!product) {
       return c.json({ error: 'Product not found' }, 404);
     }
     
-    const images = await c.env.DB.prepare(
-      'SELECT image_url FROM product_images WHERE product_id = ? ORDER BY display_order'
-    ).bind(id).all();
+    // 解析图片列表
+    const allImages = (product as any).all_images;
+    const productData: any = {
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      category: product.category,
+      folder: product.folder,
+      features: product.features,
+      created_at: product.created_at,
+      images: allImages ? String(allImages).split(',') : [],
+    };
     
-    (product as any).images = images.results.map((img: any) => img.image_url);
-    
-    // 创建响应并设置缓存头
-    response = new Response(JSON.stringify({ product }), {
+    // 创建响应并设置优化的缓存头
+    // 产品详情页缓存时间更长，因为访问频率较低但内容更稳定
+    response = new Response(JSON.stringify({ product: productData }), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=600, s-maxage=1800', // 客户端10分钟，CDN30分钟
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200', // CDN缓存1小时，过期后2小时内可继续使用
         'X-Cache': 'MISS',
       },
     });
     
     // 存入缓存
-    c.executionCtx.waitUntil(cache.put(cacheKey.toString(), response.clone()));
+    c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
     
     return response;
   } catch (error: any) {
+    console.error('Error fetching product:', error);
     return c.json({ error: error.message }, 500);
   }
 });

@@ -19,15 +19,8 @@ const ProductDetail = () => {
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
-      // 添加时间戳参数以绕过缓存（每分钟更新一次）
-      const cacheKey = Math.floor(Date.now() / 60000);
-      const response = await fetch(`${API_BASE_URL}/api/products/${id}?_t=${cacheKey}`, {
-        // 强制不使用浏览器缓存
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      });
+      // 移除强制刷新逻辑，允许使用HTTP缓存
+      const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch product');
@@ -49,8 +42,8 @@ const ProductDetail = () => {
       }
       return null;
     },
-    staleTime: 1 * 60 * 1000, // 1分钟内数据被视为新鲜（从10分钟改为1分钟）
-    gcTime: 5 * 60 * 1000, // 缓存保留5分钟（从30分钟改为5分钟）
+    staleTime: 10 * 60 * 1000, // 10分钟内数据被视为新鲜
+    gcTime: 60 * 60 * 1000, // 缓存保留1小时
     enabled: !!id, // 只在有id时才执行查询
   });
 
@@ -174,6 +167,7 @@ const ProductDetail = () => {
               <img
                 src={currentImage}
                 alt={product.name}
+                loading="lazy"
                 className="w-full h-full object-contain"
               />
               
@@ -219,6 +213,7 @@ const ProductDetail = () => {
                     <img
                       src={`${API_BASE_URL}/api/images/${img}`}
                       alt={`${product.name} ${index + 1}`}
+                      loading="lazy"
                       className="w-full h-full object-contain"
                     />
                   </button>
