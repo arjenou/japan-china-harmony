@@ -11,12 +11,14 @@ import Footer from "@/components/Footer";
 const Index = () => {
   // 使用 useLayoutEffect 在 DOM 更新后、浏览器绘制前执行
   useLayoutEffect(() => {
-    // 检查是否有待滚动的目标section（从导航菜单点击）
+    // 检查是否有待滚动的目标section（从导航菜单点击或产品页联系按钮）
     const scrollTarget = sessionStorage.getItem('scrollTarget');
     
     if (scrollTarget) {
       // 清除存储的目标
       sessionStorage.removeItem('scrollTarget');
+      // 同时清除产品滚动标记，避免冲突
+      sessionStorage.removeItem('shouldScrollToProducts');
       
       // 等待页面完全渲染后再滚动
       setTimeout(() => {
@@ -31,6 +33,7 @@ const Index = () => {
           });
         }
       }, 100);
+      return; // 如果有 scrollTarget，不执行后续的 shouldScrollToProducts 逻辑
     }
     
     // 检查是否需要滚动到产品区域（从产品详情页通过浏览器后退按钮返回）

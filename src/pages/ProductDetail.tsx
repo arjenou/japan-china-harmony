@@ -264,10 +264,10 @@ const ProductDetail = () => {
               </p>
               <Button 
                 onClick={() => {
+                  // 清除产品滚动标记，设置联系表单滚动目标
+                  sessionStorage.removeItem('shouldScrollToProducts');
+                  sessionStorage.setItem('scrollTarget', 'contact');
                   navigate("/");
-                  setTimeout(() => {
-                    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-                  }, 100);
                 }}
                 className="w-full sm:w-auto"
               >
