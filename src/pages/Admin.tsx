@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
-import { compressImages, formatFileSize } from '@/lib/imageCompressor';
+import { compressImages } from '@/lib/imageCompressor';
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
@@ -140,11 +140,6 @@ export default function Admin() {
       if (selectedFiles && selectedFiles.length > 0) {
         setIsCompressing(true);
         setCompressionProgress({ current: 0, total: selectedFiles.length });
-        
-        toast({
-          title: '正在压缩图片',
-          description: `共 ${selectedFiles.length} 张图片需要处理...`,
-        });
 
         const filesArray = Array.from(selectedFiles);
         const compressedFiles = await compressImages(
@@ -161,15 +156,6 @@ export default function Admin() {
         );
 
         setIsCompressing(false);
-
-        // 计算总大小
-        const originalSize = filesArray.reduce((sum, f) => sum + f.size, 0);
-        const compressedSize = compressedFiles.reduce((sum, f) => sum + f.size, 0);
-
-        toast({
-          title: '图片压缩完成',
-          description: `原始大小: ${formatFileSize(originalSize)} → 压缩后: ${formatFileSize(compressedSize)}`,
-        });
 
         for (let i = 0; i < compressedFiles.length; i++) {
           formDataToSend.append('images', compressedFiles[i]);
