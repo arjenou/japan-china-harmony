@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { compressImages } from '@/lib/imageCompressor';
 
-const API_BASE_URL = 'https://api.mono-grp.com';
+const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
 
 const categories = [
   'ヨガウェア',
@@ -475,21 +475,6 @@ export default function Admin() {
                   <p className="text-sm text-gray-500 mt-1">每行一个特征</p>
                 </div>
 
-                <div>
-                  <Label htmlFor="images">商品图片 {!editingProduct && '*'}</Label>
-                  <Input
-                    id="images"
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => setSelectedFiles(e.target.files)}
-                    className="cursor-pointer"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    {editingProduct ? '选择文件以添加新图片' : '可选择多张图片'}
-                  </p>
-                </div>
-
                 {editingProduct && editingProduct.images && editingProduct.images.length > 0 && (
                   <div>
                     <Label>当前图片</Label>
@@ -562,6 +547,42 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
+
+                <div>
+                  <Label htmlFor="images">
+                    {editingProduct ? (
+                      <span className="flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        添加更多图片
+                      </span>
+                    ) : (
+                      '商品图片 *'
+                    )}
+                  </Label>
+                  <Input
+                    id="images"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => setSelectedFiles(e.target.files)}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {editingProduct ? (
+                      <span className="flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3" />
+                        选择一张或多张图片，将自动添加到现有图片列表末尾
+                      </span>
+                    ) : (
+                      '可选择多张图片，第一张将作为主图'
+                    )}
+                  </p>
+                  {selectedFiles && selectedFiles.length > 0 && (
+                    <p className="text-sm text-green-600 mt-1 font-medium">
+                      已选择 {selectedFiles.length} 张新图片
+                    </p>
+                  )}
+                </div>
 
                 {isCompressing && (
                   <div className="p-4 bg-blue-50 rounded-lg">

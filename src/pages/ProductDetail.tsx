@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { type Product } from "@/data/products";
 
-const API_BASE_URL = 'https://api.mono-grp.com';
+const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
 
 const ProductDetail = () => {
   const { id } = useParams();

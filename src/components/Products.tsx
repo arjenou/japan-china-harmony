@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/pagination";
 import { type Product } from "@/data/products";
 
-const API_BASE_URL = 'https://api.mono-grp.com';
+const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
 
 const Products = () => {
   const navigate = useNavigate();
