@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { compressImages } from '@/lib/imageCompressor';
 
 const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
@@ -31,6 +31,7 @@ interface Product {
   image: string;
   features?: string;
   images?: string[];
+  display_order?: number;
 }
 
 export default function Admin() {
@@ -493,6 +494,73 @@ export default function Admin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleMoveProduct = async (index: number, direction: 'up' | 'down') => {
+    if (
+      (direction === 'up' && index === 0) ||
+      (direction === 'down' && index === products.length - 1)
+    ) {
+      return;
+    }
+
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    const newProducts = [...products];
+    
+    // 交换两个产品的位置
+    [newProducts[index], newProducts[newIndex]] = [newProducts[newIndex], newProducts[index]];
+    
+    // 立即更新本地状态，提供即时反馈
+    setProducts(newProducts);
+
+    // 准备批量更新数据
+    const updateData = newProducts.map((product, idx) => ({
+      id: product.id,
+      display_order: (currentPage - 1) * pageSize + idx + 1
+    }));
+
+    // 发送到服务器
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/reorder`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ products: updateData }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        let errorMessage = '更新失败';
+        try {
+          const result = JSON.parse(text);
+          errorMessage = result.error || errorMessage;
+        } catch {
+          errorMessage = `服务器错误 (${response.status})`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      toast({
+        title: '成功',
+        description: '产品顺序已更新',
+      });
+      
+      // 刷新产品列表
+      await fetchProducts();
+    } catch (error: any) {
+      // 恢复原状态
+      setProducts(products);
+      
+      toast({
+        title: '错误',
+        description: error.message || '更新失败',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -767,7 +835,7 @@ export default function Admin() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
+            {products.map((product, index) => (
               <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video relative bg-gray-100 flex items-center justify-center">
                   {product.image ? (
@@ -784,6 +852,10 @@ export default function Admin() {
                   <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded text-xs font-medium">
                     {product.category}
                   </div>
+                  {/* 显示顺序号 */}
+                  <div className="absolute top-2 left-2 bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </div>
                 </div>
                 
                 <CardHeader>
@@ -795,7 +867,34 @@ export default function Admin() {
                   )}
                 </CardHeader>
                 
-                <CardContent>
+                <CardContent className="space-y-2">
+                  {/* 排序按钮 */}
+                  <div className="flex gap-1 mb-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-1"
+                      onClick={() => handleMoveProduct(index, 'up')}
+                      disabled={index === 0 || isLoading}
+                      title="上移"
+                    >
+                      <ArrowUp className="w-3 h-3" />
+                      上移
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-1"
+                      onClick={() => handleMoveProduct(index, 'down')}
+                      disabled={index === products.length - 1 || isLoading}
+                      title="下移"
+                    >
+                      <ArrowDown className="w-3 h-3" />
+                      下移
+                    </Button>
+                  </div>
+                  
+                  {/* 编辑和删除按钮 */}
                   <div className="flex gap-2">
                     <Button
                       variant="outline"

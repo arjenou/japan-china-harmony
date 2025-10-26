@@ -98,7 +98,7 @@ app.get('/api/products', async (c) => {
          ORDER BY pi2.display_order) as all_images
       FROM products p
       ${whereClause}
-      ORDER BY p.created_at DESC 
+      ORDER BY p.display_order ASC, p.created_at DESC 
       LIMIT ? OFFSET ?
     `;
     
@@ -469,6 +469,71 @@ app.delete('/api/products/:id', async (c) => {
     return c.json({ 
       success: true, 
       message: 'Product deleted successfully' 
+    });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// 更新产品显示顺序
+app.put('/api/products/:id/order', async (c) => {
+  const id = c.req.param('id');
+  
+  try {
+    const { display_order } = await c.req.json();
+    
+    if (typeof display_order !== 'number') {
+      return c.json({ error: 'display_order must be a number' }, 400);
+    }
+    
+    // 更新产品顺序
+    await c.env.DB.prepare(
+      'UPDATE products SET display_order = ? WHERE id = ?'
+    ).bind(display_order, id).run();
+    
+    // 清除缓存
+    const cache = caches.default;
+    const baseUrl = new URL(c.req.url).origin;
+    c.executionCtx.waitUntil(
+      Promise.all([
+        clearProductsCache(c),
+        cache.delete(`${baseUrl}/api/products/${id}`)
+      ])
+    );
+    
+    return c.json({ 
+      success: true, 
+      message: 'Product order updated successfully' 
+    });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// 批量更新产品顺序
+app.put('/api/products/reorder', async (c) => {
+  try {
+    const { products } = await c.req.json();
+    
+    if (!Array.isArray(products)) {
+      return c.json({ error: 'products must be an array' }, 400);
+    }
+    
+    // 使用事务批量更新
+    const statements = products.map((product: { id: number, display_order: number }) => {
+      return c.env.DB.prepare(
+        'UPDATE products SET display_order = ? WHERE id = ?'
+      ).bind(product.display_order, product.id);
+    });
+    
+    await c.env.DB.batch(statements);
+    
+    // 清除所有产品缓存
+    c.executionCtx.waitUntil(clearProductsCache(c));
+    
+    return c.json({ 
+      success: true, 
+      message: 'Products order updated successfully' 
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
