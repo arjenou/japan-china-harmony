@@ -475,21 +475,61 @@ app.delete('/api/products/:id', async (c) => {
   }
 });
 
-// 更新产品显示顺序
+// 更新产品显示顺序（支持分类内排序）
 app.put('/api/products/:id/order', async (c) => {
   const id = c.req.param('id');
   
   try {
-    const { display_order } = await c.req.json();
+    const { display_order, category } = await c.req.json();
     
     if (typeof display_order !== 'number') {
       return c.json({ error: 'display_order must be a number' }, 400);
     }
     
-    // 更新产品顺序
-    await c.env.DB.prepare(
-      'UPDATE products SET display_order = ? WHERE id = ?'
-    ).bind(display_order, id).run();
+    // 获取当前产品信息
+    const product = await c.env.DB.prepare('SELECT * FROM products WHERE id = ?').bind(id).first();
+    
+    if (!product) {
+      return c.json({ error: 'Product not found' }, 404);
+    }
+    
+    // 如果指定了分类，在该分类内重新排序
+    if (category) {
+      // 获取该分类下的所有产品，按当前display_order排序
+      const { results } = await c.env.DB.prepare(
+        'SELECT id, display_order FROM products WHERE category = ? ORDER BY display_order ASC, created_at DESC'
+      ).bind(category).all();
+      
+      const categoryProducts = results as any[];
+      
+      // 找到当前产品在列表中的位置
+      const currentIndex = categoryProducts.findIndex(p => p.id === parseInt(id));
+      
+      if (currentIndex === -1) {
+        return c.json({ error: 'Product not found in category' }, 404);
+      }
+      
+      // 移除当前产品
+      const [currentProduct] = categoryProducts.splice(currentIndex, 1);
+      
+      // 插入到新位置（display_order - 1，因为数组从0开始）
+      const newIndex = Math.max(0, Math.min(display_order - 1, categoryProducts.length));
+      categoryProducts.splice(newIndex, 0, currentProduct);
+      
+      // 批量更新所有产品的display_order
+      const statements = categoryProducts.map((p, idx) => {
+        return c.env.DB.prepare(
+          'UPDATE products SET display_order = ? WHERE id = ?'
+        ).bind(idx + 1, p.id);
+      });
+      
+      await c.env.DB.batch(statements);
+    } else {
+      // 全局排序（不推荐使用，但保留向后兼容）
+      await c.env.DB.prepare(
+        'UPDATE products SET display_order = ? WHERE id = ?'
+      ).bind(display_order, id).run();
+    }
     
     // 清除缓存
     const cache = caches.default;

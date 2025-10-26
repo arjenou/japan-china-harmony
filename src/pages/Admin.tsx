@@ -494,6 +494,66 @@ export default function Admin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOrderInputChange = (productId: number, newOrder: number) => {
+    // 实时更新本地显示（仅更新输入框的值）
+    setProducts(prevProducts =>
+      prevProducts.map(p =>
+        p.id === productId ? { ...p, display_order: newOrder } : p
+      )
+    );
+  };
+
+  const handleOrderInputBlur = async (productId: number, newOrder: number) => {
+    if (newOrder < 1) {
+      newOrder = 1;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}/order`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          display_order: newOrder,
+          category: selectedCategory === 'all' ? null : selectedCategory
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        let errorMessage = '更新失败';
+        try {
+          const result = JSON.parse(text);
+          errorMessage = result.error || errorMessage;
+        } catch {
+          errorMessage = `服务器错误 (${response.status})`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      toast({
+        title: '成功',
+        description: `产品顺序已更新为 ${newOrder}`,
+      });
+      
+      // 刷新产品列表以显示正确的顺序
+      await fetchProducts();
+    } catch (error: any) {
+      toast({
+        title: '错误',
+        description: error.message || '更新失败',
+        variant: 'destructive',
+      });
+      
+      // 刷新以恢复正确的数据
+      await fetchProducts();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleMoveProduct = async (index: number, direction: 'up' | 'down') => {
     if (
       (direction === 'up' && index === 0) ||
@@ -852,10 +912,24 @@ export default function Admin() {
                   <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded text-xs font-medium">
                     {product.category}
                   </div>
-                  {/* 显示顺序号 */}
-                  <div className="absolute top-2 left-2 bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
-                    {(currentPage - 1) * pageSize + index + 1}
-                  </div>
+                  {/* 显示顺序号或输入框 */}
+                  {selectedCategory === 'all' ? (
+                    <div className="absolute top-2 left-2 bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                      {(currentPage - 1) * pageSize + index + 1}
+                    </div>
+                  ) : (
+                    <div className="absolute top-2 left-2 bg-white rounded-lg shadow-md p-1">
+                      <input
+                        type="number"
+                        min="1"
+                        value={product.display_order || (currentPage - 1) * pageSize + index + 1}
+                        onChange={(e) => handleOrderInputChange(product.id, parseInt(e.target.value) || 1)}
+                        onBlur={(e) => handleOrderInputBlur(product.id, parseInt(e.target.value) || 1)}
+                        className="w-12 h-8 text-center font-bold text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        title="输入顺序号（1=最前）"
+                      />
+                    </div>
+                  )}
                 </div>
                 
                 <CardHeader>
@@ -868,31 +942,40 @@ export default function Admin() {
                 </CardHeader>
                 
                 <CardContent className="space-y-2">
-                  {/* 排序按钮 */}
-                  <div className="flex gap-1 mb-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 gap-1"
-                      onClick={() => handleMoveProduct(index, 'up')}
-                      disabled={index === 0 || isLoading}
-                      title="上移"
-                    >
-                      <ArrowUp className="w-3 h-3" />
-                      上移
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 gap-1"
-                      onClick={() => handleMoveProduct(index, 'down')}
-                      disabled={index === products.length - 1 || isLoading}
-                      title="下移"
-                    >
-                      <ArrowDown className="w-3 h-3" />
-                      下移
-                    </Button>
-                  </div>
+                  {/* 在"全部"分类时显示排序按钮 */}
+                  {selectedCategory === 'all' && (
+                    <div className="flex gap-1 mb-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1"
+                        onClick={() => handleMoveProduct(index, 'up')}
+                        disabled={index === 0 || isLoading}
+                        title="上移"
+                      >
+                        <ArrowUp className="w-3 h-3" />
+                        上移
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1"
+                        onClick={() => handleMoveProduct(index, 'down')}
+                        disabled={index === products.length - 1 || isLoading}
+                        title="下移"
+                      >
+                        <ArrowDown className="w-3 h-3" />
+                        下移
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* 在具体分类时显示提示 */}
+                  {selectedCategory !== 'all' && (
+                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 text-center">
+                      💡 输入数字设置顺序，1=最前
+                    </div>
+                  )}
                   
                   {/* 编辑和删除按钮 */}
                   <div className="flex gap-2">
