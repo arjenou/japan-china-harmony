@@ -13,11 +13,11 @@ import { compressImages } from '@/lib/imageCompressor';
 const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
 
 const categories = [
+  'バッグ類',
   'ヨガウェア',
   'ヨガ用具',
   'スポーツ・レジャー',
   '機能性ウェア',
-  'バッグ類',
   '軍手と手袋',
   '雑貨類',
   'アニメ類'

@@ -19,11 +19,11 @@ app.use('/*', cors({
 
 // 分类列表（日语）
 const categories = [
+  'バッグ類',
   'ヨガウェア',
   'ヨガ用具',
   'スポーツ・レジャー',
   '機能性ウェア',
-  'バッグ類',
   '軍手と手袋',
   '雑貨類',
   'アニメ類'
@@ -117,6 +117,7 @@ app.get('/api/products', async (c) => {
         folder: product.folder,
         features: product.features,
         created_at: product.created_at,
+        display_order: product.display_order,
         // 列表接口只返回主图，减少数据传输
         images: [product.main_image || (images[0] || '')],
       };

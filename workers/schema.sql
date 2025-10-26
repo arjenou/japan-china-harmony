@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS products (
   folder TEXT NOT NULL,
   image TEXT NOT NULL,
   features TEXT,
+  display_order INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS product_images (
 
 -- 创建索引
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_products_display_order ON products(display_order);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
 
 -- 插入初始分类数据（可选）
