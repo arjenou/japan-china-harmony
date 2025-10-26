@@ -7,12 +7,14 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { type Product } from "@/data/products";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // 使用 React Query 获取产品详情（带缓存）
@@ -131,10 +133,10 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-2xl font-bold mb-4">商品が見つかりません</h2>
+          <h2 className="text-2xl font-bold mb-4">{t('productDetail.notFound')}</h2>
           <Button onClick={handleBackToProducts} variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            商品一覧に戻る
+            {t('productDetail.backToList')}
           </Button>
         </div>
         <Footer />
@@ -156,7 +158,7 @@ const ProductDetail = () => {
           className="mb-6 hover:bg-primary/5"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          商品一覧に戻る
+          {t('productDetail.backToList')}
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -236,7 +238,7 @@ const ProductDetail = () => {
             <div className="w-full h-px bg-border" />
 
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-foreground">商品の特徴</h2>
+              <h2 className="text-xl font-bold text-foreground">{t('productDetail.features')}</h2>
               <div className="prose prose-sm text-muted-foreground">
                 {product.features ? (
                   <ul className="space-y-2">
@@ -246,10 +248,10 @@ const ProductDetail = () => {
                   </ul>
                 ) : (
                   <ul className="space-y-2">
-                    <li>高品質な素材を使用</li>
-                    <li>実用性と耐久性を兼ね備えた設計</li>
-                    <li>日常使いに最適</li>
-                    <li>OEM/ODM対応可能</li>
+                    <li>{t('productDetail.defaultFeature1')}</li>
+                    <li>{t('productDetail.defaultFeature2')}</li>
+                    <li>{t('productDetail.defaultFeature3')}</li>
+                    <li>{t('productDetail.defaultFeature4')}</li>
                   </ul>
                 )}
               </div>
@@ -258,9 +260,9 @@ const ProductDetail = () => {
             <div className="w-full h-px bg-border" />
 
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-foreground">お問い合わせ</h2>
+              <h2 className="text-xl font-bold text-foreground">{t('productDetail.contactTitle')}</h2>
               <p className="text-muted-foreground">
-                この商品についてのご質問やご注文については、お気軽にお問い合わせください。
+                {t('productDetail.contactDescription')}
               </p>
               <Button 
                 onClick={() => {
@@ -271,17 +273,17 @@ const ProductDetail = () => {
                 }}
                 className="w-full sm:w-auto"
               >
-                お問い合わせ
+                {t('productDetail.contactButton')}
               </Button>
             </div>
 
             <div className="bg-muted/50 rounded-lg p-6 space-y-3">
-              <h3 className="font-bold text-foreground">サービス内容</h3>
+              <h3 className="font-bold text-foreground">{t('productDetail.servicesTitle')}</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>✓ 小ロットから大量生産まで対応</li>
-                <li>✓ OEM/ODMサービス</li>
-                <li>✓ 品質管理と検査</li>
-                <li>✓ 柔軟な納期対応</li>
+                <li>{t('productDetail.service1')}</li>
+                <li>{t('productDetail.service2')}</li>
+                <li>{t('productDetail.service3')}</li>
+                <li>{t('productDetail.service4')}</li>
               </ul>
             </div>
           </div>

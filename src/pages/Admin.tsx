@@ -180,9 +180,58 @@ export default function Admin() {
           title: '成功',
           description: editingProduct ? '商品更新成功' : '商品创建成功',
         });
-        setIsDialogOpen(false);
-        resetForm();
-        fetchProducts();
+        
+        // 如果是编辑模式，重新获取产品数据并保持对话框打开
+        if (editingProduct) {
+          // 清空文件选择
+          setSelectedFiles(null);
+          // 清空文件输入框
+          const fileInput = document.getElementById('images') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+          }
+          
+          // 重新获取该产品的最新数据
+          const updatedProductResponse = await fetch(
+            `${API_BASE_URL}/api/products/${editingProduct.id}?_t=${Date.now()}`,
+            {
+              cache: 'no-store',
+              headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+              },
+            }
+          );
+          
+          if (updatedProductResponse.ok) {
+            const data = await updatedProductResponse.json();
+            const updatedProduct = data.product || data; // 兼容两种返回格式
+            setEditingProduct(updatedProduct);
+            
+            // 更新表单数据
+            setFormData({
+              name: updatedProduct.name,
+              category: updatedProduct.category,
+              features: updatedProduct.features || '',
+              folder: updatedProduct.folder
+            });
+            
+            // 立即更新本地 products 列表中对应的产品数据
+            setProducts(prevProducts => 
+              prevProducts.map(p => 
+                p.id === updatedProduct.id ? updatedProduct : p
+              )
+            );
+          }
+          
+          // 后台刷新产品列表，确保与服务器完全同步
+          fetchProducts();
+        } else {
+          // 新建模式，关闭对话框
+          setIsDialogOpen(false);
+          resetForm();
+          fetchProducts();
+        }
       } else {
         throw new Error(result.error || '操作失败');
       }
@@ -368,15 +417,63 @@ export default function Admin() {
     setEditingProduct(null);
   };
 
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      category: product.category,
-      features: product.features || '',
-      folder: product.folder
-    });
-    setIsDialogOpen(true);
+  const handleEdit = async (product: Product) => {
+    // 从服务器获取最新的产品数据，确保显示最新信息
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/${product.id}?_t=${Date.now()}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const latestProduct = data.product || data;
+        
+        setEditingProduct(latestProduct);
+        setFormData({
+          name: latestProduct.name,
+          category: latestProduct.category,
+          features: latestProduct.features || '',
+          folder: latestProduct.folder
+        });
+        setIsDialogOpen(true);
+      } else {
+        // 如果获取失败，使用本地数据作为后备
+        setEditingProduct(product);
+        setFormData({
+          name: product.name,
+          category: product.category,
+          features: product.features || '',
+          folder: product.folder
+        });
+        setIsDialogOpen(true);
+        
+        toast({
+          title: '提示',
+          description: '获取最新数据失败，显示可能不是最新的',
+          variant: 'default',
+        });
+      }
+    } catch (error) {
+      // 出错时使用本地数据
+      setEditingProduct(product);
+      setFormData({
+        name: product.name,
+        category: product.category,
+        features: product.features || '',
+        folder: product.folder
+      });
+      setIsDialogOpen(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDialogClose = (open: boolean) => {
@@ -571,16 +668,19 @@ export default function Admin() {
                     {editingProduct ? (
                       <span className="flex items-center gap-1">
                         <ImageIcon className="w-3 h-3" />
-                        选择一张或多张图片，将自动添加到现有图片列表末尾
+                        选择图片后点击"更新商品"，新图片将追加到列表末尾（无需关闭窗口）
                       </span>
                     ) : (
                       '可选择多张图片，第一张将作为主图'
                     )}
                   </p>
                   {selectedFiles && selectedFiles.length > 0 && (
-                    <p className="text-sm text-green-600 mt-1 font-medium">
-                      已选择 {selectedFiles.length} 张新图片
-                    </p>
+                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                      <p className="text-sm text-green-700 font-medium flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4" />
+                        已选择 {selectedFiles.length} 张新图片，点击"更新商品"按钮上传
+                      </p>
+                    </div>
                   )}
                 </div>
 
