@@ -32,7 +32,31 @@ const Index = () => {
         }
       }, 100);
     }
-    // 注意：从产品详情页返回的滚动恢复由 App.tsx 的 ScrollToTop 处理
+    
+    // 检查是否需要滚动到产品区域（从产品详情页通过浏览器后退按钮返回）
+    const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
+    
+    if (shouldScrollToProducts === 'true') {
+      // 清除标记
+      sessionStorage.removeItem('shouldScrollToProducts');
+      
+      // 等待页面完全渲染后再滚动到产品区域
+      // 使用 requestAnimationFrame 确保在浏览器下一次重绘前执行
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const productsElement = document.getElementById('products');
+          if (productsElement) {
+            const offset = 80;
+            const elementPosition = productsElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+          }
+        }, 300);
+      });
+    }
   }, []);
 
   return (

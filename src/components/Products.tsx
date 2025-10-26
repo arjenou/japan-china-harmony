@@ -363,6 +363,10 @@ const Products = () => {
                       sessionStorage.setItem('productsState', JSON.stringify(currentState));
                       sessionStorage.setItem('lastViewedProductId', product.id.toString());
                       
+                      // 设置标记，表示从产品列表进入详情页
+                      // 当用户使用浏览器后退按钮返回时，会自动滚动到产品区域
+                      sessionStorage.setItem('shouldScrollToProducts', 'true');
+                      
                       // 保存当前的精确滚动位置
                       sessionStorage.setItem('savedScrollPosition', window.pageYOffset.toString());
                       

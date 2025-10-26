@@ -25,22 +25,15 @@ function ScrollToTop() {
   useLayoutEffect(() => {
     // 检查是否需要恢复滚动位置（从产品详情页返回）
     const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
-    const savedScrollPosition = sessionStorage.getItem('savedScrollPosition');
     
-    if (shouldScrollToProducts === 'true' && savedScrollPosition) {
-      // 直接恢复到保存的滚动位置
-      const scrollPos = parseInt(savedScrollPosition, 10);
-      window.scrollTo({
-        top: scrollPos,
-        behavior: 'auto', // 立即跳转，无动画
-      });
-      // 清除标记
-      sessionStorage.removeItem('shouldScrollToProducts');
-      sessionStorage.removeItem('savedScrollPosition');
-    } else if (shouldScrollToProducts !== 'true') {
-      // 正常情况下滚动到顶部
-      window.scrollTo(0, 0);
+    // 如果标记存在，不执行任何操作，让 Index.tsx 组件处理滚动
+    if (shouldScrollToProducts === 'true') {
+      // 不执行任何操作，让 Index.tsx 处理滚动到产品区域
+      return;
     }
+    
+    // 正常情况下滚动到顶部
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   return null;
