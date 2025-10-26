@@ -194,11 +194,22 @@ async function clearProductsCache(c: any) {
     `${baseUrl}/api/products?page=1&pageSize=12`,
   ];
   
+  // 清除多个页面的缓存（最多前10页）
+  for (let page = 1; page <= 10; page++) {
+    keys.push(`${baseUrl}/api/products?page=${page}`);
+    keys.push(`${baseUrl}/api/products?page=${page}&pageSize=12`);
+    keys.push(`${baseUrl}/api/products?page=${page}&pageSize=9`);
+    keys.push(`${baseUrl}/api/products?page=${page}&pageSize=20`);
+  }
+  
   // 清除所有分类的缓存（日文分类）
   for (const category of categories) {
     keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
-    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1`);
-    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1&pageSize=12`);
+    for (let page = 1; page <= 5; page++) {
+      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}`);
+      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}&pageSize=12`);
+      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}&pageSize=9`);
+    }
   }
   
   // 也清除中文分类（Admin页面使用的）
@@ -209,14 +220,15 @@ async function clearProductsCache(c: any) {
   
   for (const category of chineseCategories) {
     keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
-    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1`);
-    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=1&pageSize=12`);
+    for (let page = 1; page <= 5; page++) {
+      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}`);
+      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}&pageSize=12`);
+    }
   }
   
   // 批量删除缓存
   await Promise.all(keys.map(key => cache.delete(key)));
   
-  // 额外的安全措施：尝试删除所有可能的URL变体
   console.log(`Cleared ${keys.length} cache keys`);
 }
 
@@ -427,6 +439,49 @@ app.delete('/api/products/:id/images/:imageUrl', async (c) => {
     return c.json({ 
       success: true, 
       message: 'Image deleted successfully' 
+    });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// 更新图片顺序
+app.put('/api/products/:id/images/reorder', async (c) => {
+  const id = c.req.param('id');
+  
+  try {
+    const body = await c.req.json();
+    const { images } = body; // 期望是一个图片URL数组，按新的顺序排列
+    
+    if (!Array.isArray(images) || images.length === 0) {
+      return c.json({ error: 'Images array is required' }, 400);
+    }
+    
+    // 更新每个图片的 display_order
+    for (let i = 0; i < images.length; i++) {
+      await c.env.DB.prepare(
+        'UPDATE product_images SET display_order = ? WHERE product_id = ? AND image_url = ?'
+      ).bind(i, id, images[i]).run();
+    }
+    
+    // 更新商品的主图为第一张图片
+    await c.env.DB.prepare(
+      'UPDATE products SET image = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind(images[0], id).run();
+    
+    // 清除相关缓存
+    const cache = caches.default;
+    const baseUrl = new URL(c.req.url).origin;
+    c.executionCtx.waitUntil(
+      Promise.all([
+        clearProductsCache(c),
+        cache.delete(`${baseUrl}/api/products/${id}`)
+      ])
+    );
+    
+    return c.json({ 
+      success: true, 
+      message: 'Image order updated successfully' 
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);

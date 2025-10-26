@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 
 const API_BASE_URL = 'https://api.mono-grp.com';
 
@@ -255,6 +255,88 @@ export default function Admin() {
     }
   };
 
+  const handleMoveImage = async (direction: 'up' | 'down', index: number) => {
+    if (!editingProduct || !editingProduct.images) return;
+
+    const images = [...editingProduct.images];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    // 检查边界
+    if (newIndex < 0 || newIndex >= images.length) return;
+
+    // 交换位置
+    [images[index], images[newIndex]] = [images[newIndex], images[index]];
+
+    // 立即更新本地状态，提供即时反馈
+    setEditingProduct({
+      ...editingProduct,
+      images,
+      image: images[0], // 更新主图为第一张
+    });
+
+    // 发送到服务器
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/${editingProduct.id}/images/reorder`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ images }),
+        }
+      );
+
+      // 检查响应状态
+      if (!response.ok) {
+        // 尝试解析错误响应
+        const text = await response.text();
+        let errorMessage = '更新失败';
+        try {
+          const result = JSON.parse(text);
+          errorMessage = result.error || errorMessage;
+        } catch {
+          // 如果不是JSON，使用HTTP状态码
+          errorMessage = `服务器错误 (${response.status})`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // 解析成功响应
+      const result = await response.json();
+
+      toast({
+        title: '成功',
+        description: '图片顺序已更新',
+      });
+      
+      // 后台刷新产品列表，确保与服务器同步
+      fetchProducts();
+    } catch (error: any) {
+      // 恢复原状态
+      if (editingProduct && editingProduct.images) {
+        // 如果有原始数据，恢复
+        const product = products.find(p => p.id === editingProduct.id);
+        if (product) {
+          setEditingProduct({
+            ...editingProduct,
+            images: product.images || [],
+            image: product.image,
+          });
+        }
+      }
+      
+      toast({
+        title: '错误',
+        description: error.message || '更新失败，请确保后端API已部署',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({ name: '', category: '', features: '', folder: '' });
     setSelectedFiles(null);
@@ -386,25 +468,70 @@ export default function Admin() {
                 {editingProduct && editingProduct.images && editingProduct.images.length > 0 && (
                   <div>
                     <Label>当前图片</Label>
-                    <div className="grid grid-cols-4 gap-2 mt-2">
+                    <p className="text-sm text-gray-500 mb-2">第一张图片将作为主图显示</p>
+                    <div className="grid grid-cols-3 gap-3 mt-2">
                       {editingProduct.images.map((img, index) => (
-                        <div key={index} className="relative group">
-                          <div className="w-full h-24 bg-secondary/30 rounded flex items-center justify-center">
+                        <div key={index} className="relative group border rounded-lg p-2 bg-white hover:shadow-md transition-shadow">
+                          <div className="w-full h-32 bg-secondary/30 rounded flex items-center justify-center mb-2">
                             <img
                               src={`${API_BASE_URL}/api/images/${img}`}
                               alt={`Product ${index + 1}`}
                               className="max-w-full max-h-full object-contain"
                             />
                           </div>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => handleDeleteImage(editingProduct.id, img)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                          
+                          {/* 图片编号和主图标记 */}
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <span className="text-xs font-medium text-gray-600">
+                              图 {index + 1}
+                            </span>
+                            {index === 0 && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                主图
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* 控制按钮组 */}
+                          <div className="flex gap-1">
+                            {/* 上移按钮 */}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-7"
+                              onClick={() => handleMoveImage('up', index)}
+                              disabled={index === 0}
+                              title="上移"
+                            >
+                              <ChevronUp className="h-3 w-3" />
+                            </Button>
+                            
+                            {/* 下移按钮 */}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-7"
+                              onClick={() => handleMoveImage('down', index)}
+                              disabled={index === editingProduct.images!.length - 1}
+                              title="下移"
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </Button>
+                            
+                            {/* 删除按钮 */}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1 h-7"
+                              onClick={() => handleDeleteImage(editingProduct.id, img)}
+                              title="删除"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
