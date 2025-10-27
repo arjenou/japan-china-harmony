@@ -106,12 +106,12 @@ const Products = () => {
   const categories = [
     t('products.categories.all'),
     t('products.categories.bags'),
+    t('products.categories.goods'),
     t('products.categories.yoga'),
     t('products.categories.yogaTools'),
     t('products.categories.sports'),
     t('products.categories.functional'),
     t('products.categories.gloves'),
-    t('products.categories.goods'),
     t('products.categories.anime'),
   ];
   
