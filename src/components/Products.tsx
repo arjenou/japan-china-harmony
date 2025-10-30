@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/pagination";
 import { type Product } from "@/data/products";
 
-const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
+const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 
 const Products = () => {

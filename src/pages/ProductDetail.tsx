@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { type Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
+const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 
 const ProductDetail = () => {

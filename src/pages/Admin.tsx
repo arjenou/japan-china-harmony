@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { compressImages } from '@/lib/imageCompressor';
 
-const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
+const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 
 const categories = [
