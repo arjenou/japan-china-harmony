@@ -61,7 +61,7 @@ const imageMap = {};
 imageFiles.forEach(filePath => {
   const relativePath = path.relative(PUBLIC_DIR, filePath);
   const key = relativePath.replace(/\\/g, '/');
-  imageMap[key] = `https://your-worker-url.workers.dev/api/images/${key}`;
+imageMap[key] = `https://img.mono-grp.com/api/images/${key}`;
 });
 
 const mapPath = path.join(__dirname, '../image-map.json');

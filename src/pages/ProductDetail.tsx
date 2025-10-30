@@ -10,6 +10,7 @@ import { type Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
+const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -34,7 +35,7 @@ const ProductDetail = () => {
         const apiProduct: Product = {
           id: data.product.id,
           name: data.product.name,
-          image: `${API_BASE_URL}/api/images/${data.product.image}`,
+          image: `${IMAGE_BASE_URL}/api/images/${data.product.image}`,
           category: data.product.category,
           folder: data.product.folder,
           images: data.product.images || [],
@@ -144,7 +145,7 @@ const ProductDetail = () => {
     );
   }
 
-  const currentImage = `${API_BASE_URL}/api/images/${product.images[currentImageIndex]}`;
+  const currentImage = `${IMAGE_BASE_URL}/api/images/${product.images[currentImageIndex]}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -213,7 +214,7 @@ const ProductDetail = () => {
                     }`}
                   >
                     <img
-                      src={`${API_BASE_URL}/api/images/${img}`}
+                      src={`${IMAGE_BASE_URL}/api/images/${img}`}
                       alt={`${product.name} ${index + 1}`}
                       loading="lazy"
                       className="w-full h-full object-contain"

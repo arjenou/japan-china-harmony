@@ -25,6 +25,7 @@ import {
 import { type Product } from "@/data/products";
 
 const API_BASE_URL = 'https://yingwu-admin.wangyunjie1101.workers.dev';
+const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 
 const Products = () => {
   const navigate = useNavigate();
@@ -181,7 +182,7 @@ const Products = () => {
       const apiProducts: Product[] = data.products.map((p: any) => ({
         id: p.id,
         name: p.name,
-        image: `${API_BASE_URL}/api/images/${p.image}`,
+        image: `${IMAGE_BASE_URL}/api/images/${p.image}`,
         category: p.category,
         folder: p.folder,
         images: p.images || [],
