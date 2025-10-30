@@ -659,7 +659,16 @@ app.put('/api/products/:id/images/reorder', async (c) => {
 
 // 获取图片（强缓存，永不过期）
 app.get('/api/images/:key{.+}', async (c) => {
-  const key = c.req.param('key');
+  const rawKey = c.req.param('key');
+  // 处理 URL 编码的路径（含中文/日文、空格等），确保与 R2 中的原始对象键一致
+  const key = (() => {
+    try {
+      // decodeURIComponent 不会改变已是纯 ASCII 的键，但会把 %E5%.. 还原为原始字符
+      return decodeURIComponent(rawKey);
+    } catch {
+      return rawKey;
+    }
+  })();
   
   // 使用 Cloudflare Cache API
   const cacheKey = new URL(c.req.url);
