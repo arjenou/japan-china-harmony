@@ -205,32 +205,61 @@ const Products = () => {
   const totalProducts = data?.total || 0;
   const totalPages = data?.totalPages || 0;
 
-  // 在产品列表加载完成后，给之前浏览的商品添加高亮效果
+  // 在产品列表加载完成后，滚动到之前浏览的产品位置并添加高亮效果
   useLayoutEffect(() => {
-    // 检查是否有上次浏览的产品ID
+    // 检查是否有上次浏览的产品ID和需要滚动的标记
     const lastProductId = sessionStorage.getItem('lastViewedProductId');
+    const shouldScroll = sessionStorage.getItem('shouldScrollToProducts');
     
-    if (lastProductId && !isLoading && products.length > 0 && !shouldScrollToProduct) {
+    if (lastProductId && shouldScroll === 'true' && !isLoading && products.length > 0 && !shouldScrollToProduct) {
       // 标记已处理
       setShouldScrollToProduct(true);
       
-      // 找到产品元素并添加高亮效果
-      const productElement = document.getElementById(`product-${lastProductId}`);
-      if (productElement) {
-        // 添加高亮效果
-        productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-        
-        // 延迟清理高亮和存储
+      // 使用 requestAnimationFrame 确保 DOM 已完全渲染
+      requestAnimationFrame(() => {
         setTimeout(() => {
-          productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-          sessionStorage.removeItem('lastViewedProductId');
-          sessionStorage.removeItem('productsState');
-        }, 2000);
-      } else {
-        // 如果找不到产品元素，也要清理
-        sessionStorage.removeItem('lastViewedProductId');
-        sessionStorage.removeItem('productsState');
-      }
+          const productElement = document.getElementById(`product-${lastProductId}`);
+          if (productElement) {
+            // 计算产品元素的位置（考虑导航栏高度）
+            const offset = 100; // 导航栏高度 + 一些间距
+            const elementPosition = productElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            
+            // 滚动到产品位置
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+            
+            // 添加高亮效果
+            productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'transition-all', 'duration-300');
+            
+            // 延迟清理高亮和存储
+            setTimeout(() => {
+              productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+              sessionStorage.removeItem('lastViewedProductId');
+              sessionStorage.removeItem('shouldScrollToProducts');
+              sessionStorage.removeItem('productsState');
+            }, 3000); // 延长高亮时间到3秒，让用户更清楚地看到
+          } else {
+            // 如果当前页面找不到产品（可能在不同页），滚动到产品区域
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+              const offset = 100;
+              const elementPosition = productsSection.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.pageYOffset - offset;
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth",
+              });
+            }
+            // 清理存储
+            sessionStorage.removeItem('lastViewedProductId');
+            sessionStorage.removeItem('shouldScrollToProducts');
+            sessionStorage.removeItem('productsState');
+          }
+        }, 100);
+      });
     }
   }, [isLoading, products, shouldScrollToProduct]);
 

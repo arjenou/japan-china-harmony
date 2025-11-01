@@ -5,7 +5,7 @@ import Philosophy from "@/components/Philosophy";
 import Factories from "@/components/Factories";
 import Services from "@/components/Services";
 import Products from "@/components/Products";
-import ProcessFlow from "@/components/ProcessFlow";
+// import ProcessFlow from "@/components/ProcessFlow";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
@@ -38,9 +38,13 @@ const Index = () => {
     }
     
     // 检查是否需要滚动到产品区域（从产品详情页通过浏览器后退按钮返回）
+    // 注意：如果有 lastViewedProductId，让 Products 组件处理具体产品的滚动
+    // 这里只处理没有具体产品ID的情况（直接滚动到产品区域）
     const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
+    const lastProductId = sessionStorage.getItem('lastViewedProductId');
     
-    if (shouldScrollToProducts === 'true') {
+    if (shouldScrollToProducts === 'true' && !lastProductId) {
+      // 如果没有具体产品ID，只滚动到产品区域顶部
       // 清除标记
       sessionStorage.removeItem('shouldScrollToProducts');
       
@@ -61,6 +65,7 @@ const Index = () => {
         }, 300);
       });
     }
+    // 如果有 lastProductId，Products 组件会自己处理滚动到具体产品位置
   }, []);
 
   return (
@@ -72,7 +77,7 @@ const Index = () => {
         <Factories />
         <Services />
         <Products />
-        <ProcessFlow />
+        {/* <ProcessFlow /> */}
         <Contact />
         <Footer />
       </main>
