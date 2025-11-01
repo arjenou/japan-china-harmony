@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Select,
   SelectContent,
@@ -30,6 +31,7 @@ const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 const Products = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
+  const isMobile = useIsMobile();
   
   // 检查是否需要恢复状态（只在初始化时读取一次）
   const [isRestoringState] = useState(() => {
@@ -274,29 +276,31 @@ const Products = () => {
               <p className="text-xs mt-2 opacity-80">{t('products.searchHint')}</p>
             </div>
 
-            {/* Category */}
-            <div className="bg-primary text-primary-foreground p-4 rounded-lg">
-              <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">{t('products.categoryTitle')}</h3>
-              <ul className="space-y-1">
-                {categories.map((category) => (
-                  <li key={category}>
-                    <button
-                      onClick={() => {
-                        setSelectedCategory(category);
-                        setCurrentPage(1);
-                      }}
-                      className={`w-full text-left py-2 px-3 text-sm transition-smooth rounded ${
-                        selectedCategory === category
-                          ? "bg-accent text-accent-foreground font-semibold"
-                          : "hover:bg-primary-foreground/10"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Category - 桌面端显示 */}
+            {!isMobile && (
+              <div className="bg-primary text-primary-foreground p-4 rounded-lg">
+                <h3 className="font-bold text-sm mb-3 uppercase tracking-wide">{t('products.categoryTitle')}</h3>
+                <ul className="space-y-1">
+                  {categories.map((category) => (
+                    <li key={category}>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory(category);
+                          setCurrentPage(1);
+                        }}
+                        className={`w-full text-left py-2 px-3 text-sm transition-smooth rounded ${
+                          selectedCategory === category
+                            ? "bg-accent text-accent-foreground font-semibold"
+                            : "hover:bg-primary-foreground/10"
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </aside>
 
           {/* Main Content */}
@@ -306,19 +310,39 @@ const Products = () => {
               <div className="text-sm text-muted-foreground">
                 <span className="text-foreground font-semibold">{totalProducts}</span>{t('products.resultsText')}
               </div>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
-                setItemsPerPage(Number(value));
-                setCurrentPage(1);
-              }}>
-                <SelectTrigger className="w-32 bg-card">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  <SelectItem value="12">12{t('products.itemsPerPage')}</SelectItem>
-                  <SelectItem value="20">20{t('products.itemsPerPage')}</SelectItem>
-                  <SelectItem value="36">36{t('products.itemsPerPage')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-3">
+                {/* 移动端：类别下拉菜单放在顶部栏 */}
+                {isMobile && (
+                  <Select value={selectedCategory} onValueChange={(value) => {
+                    setSelectedCategory(value);
+                    setCurrentPage(1);
+                  }}>
+                    <SelectTrigger className="bg-card text-foreground border-border min-w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                  setItemsPerPage(Number(value));
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger className="w-32 bg-card">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover">
+                    <SelectItem value="12">12{t('products.itemsPerPage')}</SelectItem>
+                    <SelectItem value="20">20{t('products.itemsPerPage')}</SelectItem>
+                    <SelectItem value="36">36{t('products.itemsPerPage')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Products Grid */}

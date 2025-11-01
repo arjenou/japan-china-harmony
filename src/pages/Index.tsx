@@ -5,6 +5,7 @@ import Philosophy from "@/components/Philosophy";
 import Factories from "@/components/Factories";
 import Services from "@/components/Services";
 import Products from "@/components/Products";
+import ProcessFlow from "@/components/ProcessFlow";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
@@ -71,6 +72,7 @@ const Index = () => {
         <Factories />
         <Services />
         <Products />
+        <ProcessFlow />
         <Contact />
         <Footer />
       </main>

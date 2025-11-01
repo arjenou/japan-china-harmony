@@ -171,6 +171,39 @@ const translations: Record<Language, any> = {
       defaultFeature3: '适合日常使用',
       defaultFeature4: '可对应OEM/ODM',
     },
+    processFlow: {
+      title: '业务流程',
+      step1: {
+        title: '联系与会议',
+        subtitle: '联系与会议',
+        description: '为了满足客户的需求，我们将召开会议。请详细告诉我们您的需求，如产品形象、设计、材料、数量和交货日期。欢迎您先通过电话或电子邮件联系我们。',
+      },
+      step2: {
+        title: '方案与设计',
+        subtitle: '方案与设计',
+        description: '我们将牢牢把握您的需求，并提出融入新想法的方案和设计。',
+      },
+      step3: {
+        title: '样品制作',
+        subtitle: '样品制作',
+        description: '为了将形象具体化，我们将根据决定的内容制作样品。',
+      },
+      step4: {
+        title: '订单确认',
+        subtitle: '订单确认',
+        description: '您将确认完成的样品。如果您对完成情况满意，将下达订单。',
+      },
+      step5: {
+        title: '生产制造',
+        subtitle: '生产制造',
+        description: '实际生产将在当地工厂进行。我们的员工将管理生产。',
+      },
+      step6: {
+        title: '交付发货',
+        subtitle: '交付发货',
+        description: '我们将在客户希望的交付日期交货。',
+      },
+    },
     contact: {
       title: '联系我们',
       name: '姓名',
@@ -314,6 +347,39 @@ const translations: Record<Language, any> = {
       defaultFeature3: '日常使いに最適',
       defaultFeature4: 'OEM/ODM対応可能',
     },
+    processFlow: {
+      title: '業務フロー',
+      step1: {
+        title: 'CONTACT & MEETING',
+        subtitle: 'お打ち合わせ',
+        description: 'お客様のニーズに合わせて、打ち合わせを開催いたします。製品イメージ、デザイン、材料、数量、納期などのご要望を詳しくお聞かせください。まずはお電話またはメールでお気軽にお問い合わせください。',
+      },
+      step2: {
+        title: 'PLAN & DESIGN',
+        subtitle: 'ご提案',
+        description: 'お客様のご要望をしっかりと把握し、新しいアイデアを取り入れたプランとデザインを提案いたします。',
+      },
+      step3: {
+        title: 'SAMPLE',
+        subtitle: 'サンプル作成',
+        description: 'イメージを形にするため、決まった内容をもとにサンプルを作成いたします。',
+      },
+      step4: {
+        title: 'ORDER',
+        subtitle: 'ご発注',
+        description: '完成したサンプルをご確認いただきます。仕上がりにご満足いただけましたら、ご発注をお願いいたします。',
+      },
+      step5: {
+        title: 'PRODUCE',
+        subtitle: '生産',
+        description: '実際の生産は現地工場で行われます。当社スタッフが生産管理を行います。',
+      },
+      step6: {
+        title: 'DELIVERY',
+        subtitle: '納品',
+        description: 'お客様のご希望の納期に合わせて納品いたします。',
+      },
+    },
     contact: {
       title: 'お問い合わせ',
       name: 'お名前',
@@ -456,6 +522,39 @@ const translations: Record<Language, any> = {
       defaultFeature2: 'Design combining practicality and durability',
       defaultFeature3: 'Perfect for everyday use',
       defaultFeature4: 'OEM/ODM available',
+    },
+    processFlow: {
+      title: 'Business Process',
+      step1: {
+        title: 'CONTACT & MEETING',
+        subtitle: 'お打ち合わせ',
+        description: 'To meet the needs of our customers, we will hold a meeting. Please tell us in detail about your requests, such as product image, design, materials, quantity, and delivery date. Please feel free to contact us by phone or email first.',
+      },
+      step2: {
+        title: 'PLAN & DESIGN',
+        subtitle: 'ご提案',
+        description: 'We will firmly grasp your requests and propose a plan and design that incorporates new ideas.',
+      },
+      step3: {
+        title: 'SAMPLE',
+        subtitle: 'サンプル作成',
+        description: 'To give shape to the image, we will create a sample based on the decided content.',
+      },
+      step4: {
+        title: 'ORDER',
+        subtitle: 'ご発注',
+        description: 'You will confirm the completed sample. If you are satisfied with the finish, you will place an order.',
+      },
+      step5: {
+        title: 'PRODUCE',
+        subtitle: '生産',
+        description: 'Actual production will be carried out at the local factory. Our staff will manage the production.',
+      },
+      step6: {
+        title: 'DELIVERY',
+        subtitle: '納品',
+        description: 'We will deliver to the customer\'s desired delivery date.',
+      },
     },
     contact: {
       title: 'Contact Us',
