@@ -4,7 +4,7 @@ const Footer = () => {
   const { t } = useLanguage();
   
   return (
-    <footer className="gradient-primary text-primary-foreground py-12">
+    <footer className="gradient-primary text-primary-foreground py-12 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           <div>

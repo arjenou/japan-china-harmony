@@ -1,5 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Users, Lightbulb, Calendar, Handshake, Package, CheckCircle } from "lucide-react";
+import { Users, Lightbulb, Calendar, Handshake, Package, CheckCircle, ClipboardCheck, Truck } from "lucide-react";
 
 const ProcessFlow = () => {
   const { t } = useLanguage();
@@ -26,44 +26,42 @@ const ProcessFlow = () => {
       number: '4',
     },
     {
-      icon: Package,
+      icon: CheckCircle,
       key: 'step5',
       number: '5',
     },
     {
-      icon: CheckCircle,
+      icon: Package,
       key: 'step6',
       number: '6',
+    },
+    {
+      icon: ClipboardCheck,
+      key: 'step7',
+      number: '7',
+    },
+    {
+      icon: Truck,
+      key: 'step8',
+      number: '8',
     },
   ];
 
   return (
-    <section id="process" className="py-20 gradient-subtle">
+    <section id="process" className="py-20 gradient-subtle overflow-hidden">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
           {t('processFlow.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
         
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8">
-            {steps.map((step, index) => {
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 w-full">
+            {steps.map((step) => {
               const Icon = step.icon;
-              const isLastInRowMobile = index % 2 === 1; // Mobile: every 2nd item (0-indexed: 1, 3, 5)
-              const isLastInRowDesktop = (index + 1) % 3 === 0; // Desktop: every 3rd item
-              const isLastStep = index === steps.length - 1;
               
               return (
                 <div key={step.key} className="relative">
-                  {/* Arrow connector - only show if not last in row */}
-                  {/* Mobile (2 columns): hide if index is 1, 3, 5 (last in pair) */}
-                  {/* Desktop (3 columns): hide if index is 2, 5 (last in triple) */}
-                  {!isLastInRowMobile && !isLastInRowDesktop && !isLastStep && (
-                    <div className="absolute top-16 md:top-24 left-full w-6 md:w-8 h-0.5 bg-border z-0 transform translate-x-2">
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-[6px] md:border-l-[10px] border-l-border border-t-[4px] md:border-t-[6px] border-t-transparent border-b-[4px] md:border-b-[6px] border-b-transparent" />
-                    </div>
-                  )}
-                  
                   <div className="bg-card p-3 md:p-6 rounded-lg md:rounded-xl shadow-card border border-border h-full relative transition-smooth hover:shadow-elegant">
                     {/* Background number */}
                     <div className="absolute top-2 right-2 md:top-4 md:right-4 text-3xl md:text-6xl font-bold text-muted-foreground/10 select-none">

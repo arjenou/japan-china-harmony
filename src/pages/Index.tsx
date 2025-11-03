@@ -5,7 +5,7 @@ import Philosophy from "@/components/Philosophy";
 import Factories from "@/components/Factories";
 import Services from "@/components/Services";
 import Products from "@/components/Products";
-// import ProcessFlow from "@/components/ProcessFlow";
+import ProcessFlow from "@/components/ProcessFlow";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
@@ -71,13 +71,13 @@ const Index = () => {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen">
+      <main className="min-h-screen w-full overflow-hidden">
         <Hero />
         <Philosophy />
         <Factories />
         <Services />
         <Products />
-        {/* <ProcessFlow /> */}
+        <ProcessFlow />
         <Contact />
         <Footer />
       </main>

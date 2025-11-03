@@ -50,6 +50,7 @@ const Navbar = () => {
     { id: "factories", label: t('nav.factories') },
     { id: "services", label: t('nav.services') },
     { id: "products", label: t('nav.products') },
+    { id: "process", label: t('nav.process') },
     { id: "contact", label: t('nav.contact') },
   ];
 

@@ -19,7 +19,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="home" className="relative min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden">
+    <section id="home" className="relative min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden w-full">
       {/* Background Images with Overlay */}
       <div className="absolute inset-0 z-0">
         {images.map((image, index) => (
