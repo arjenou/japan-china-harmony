@@ -35,30 +35,81 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // 配置阿里云企业邮箱 SMTP
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.qiye.aliyun.com',
-      port: 465,
-      secure: true, // 使用 SSL
-      auth: {
-        user: process.env.SMTP_USER || 'eikoyang@mono-grp.com.cn',
-        pass: process.env.SMTP_PASSWORD || 'Yang1234&',
-      },
-    });
+    const smtpUser = process.env.SMTP_USER || 'eikoyang@mono-grp.com.cn';
+    const smtpPassword = process.env.SMTP_PASSWORD || 'Yang1234&';
+    const recipientEmail = 'eikoyang@mono-grp.com.cn';
 
-    // 验证 SMTP 连接
-    try {
-      await transporter.verify();
-      console.log('SMTP connection verified');
-    } catch (error) {
-      console.error('SMTP connection failed:', error);
+    // 尝试多种 SMTP 配置
+    const smtpConfigs = [
+      {
+        name: 'smtp.qiye.aliyun.com:465 (SSL)',
+        host: 'smtp.qiye.aliyun.com',
+        port: 465,
+        secure: true,
+      },
+      {
+        name: 'smtp.mxhichina.com:465 (SSL)',
+        host: 'smtp.mxhichina.com',
+        port: 465,
+        secure: true,
+      },
+      {
+        name: 'smtp.qiye.aliyun.com:25 (TLS)',
+        host: 'smtp.qiye.aliyun.com',
+        port: 25,
+        secure: false,
+      },
+      {
+        name: 'smtp.mxhichina.com:25 (TLS)',
+        host: 'smtp.mxhichina.com',
+        port: 25,
+        secure: false,
+      },
+    ];
+
+    let transporter = null;
+    let successConfig = null;
+
+    // 尝试每个配置
+    for (const config of smtpConfigs) {
+      try {
+        console.log(`Trying ${config.name}...`);
+        
+        const testTransporter = nodemailer.createTransport({
+          host: config.host,
+          port: config.port,
+          secure: config.secure,
+          auth: {
+            user: smtpUser,
+            pass: smtpPassword,
+          },
+          tls: {
+            rejectUnauthorized: false, // 允许自签名证书
+          },
+        });
+
+        await testTransporter.verify();
+        console.log(`✓ ${config.name} verified successfully`);
+        
+        transporter = testTransporter;
+        successConfig = config;
+        break; // 找到可用配置，退出循环
+      } catch (error: any) {
+        console.error(`✗ ${config.name} failed:`, error.message);
+        continue; // 尝试下一个配置
+      }
+    }
+
+    // 如果所有配置都失败
+    if (!transporter || !successConfig) {
       return res.status(500).json({
-        error: 'SMTP configuration error',
-        details: 'Failed to connect to email server',
+        error: 'SMTP configuration failed',
+        details: 'All SMTP configurations failed. Please check your credentials or consider using Resend.',
+        suggestion: 'You may need to enable SMTP service or get an authorization code from Aliyun mail settings.',
       });
     }
 
-    const recipientEmail = 'eikoyang@mono-grp.com.cn';
+    console.log(`Using ${successConfig.name} for sending emails`);
 
     // 管理员邮件内容（HTML）
     const adminEmailHtml = `
@@ -161,7 +212,7 @@ export default async function handler(req: any, res: any) {
     console.log('Sending email to admin...');
     try {
       const adminInfo = await transporter.sendMail({
-        from: `"英武实业网站" <${process.env.SMTP_USER || 'eikoyang@mono-grp.com.cn'}>`,
+        from: `"英武实业网站" <${smtpUser}>`,
         to: recipientEmail,
         replyTo: email,
         subject: `新的联系表单 - ${name}`,
@@ -180,11 +231,11 @@ ${message}
         `,
       });
       console.log('Admin email sent:', adminInfo.messageId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send admin email:', error);
       return res.status(500).json({
         error: 'Failed to send admin email',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: error.message,
       });
     }
 
@@ -192,7 +243,7 @@ ${message}
     console.log('Sending auto-reply to user...');
     try {
       const userInfo = await transporter.sendMail({
-        from: `"上海英武实业有限公司" <${process.env.SMTP_USER || 'eikoyang@mono-grp.com.cn'}>`,
+        from: `"上海英武实业有限公司" <${smtpUser}>`,
         to: email,
         subject: '感谢您的咨询 - 上海英武实业',
         html: autoReplyHtml,
@@ -219,7 +270,7 @@ Changning District, Shanghai, China 〒200050
         `,
       });
       console.log('User email sent:', userInfo.messageId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send user email:', error);
       // 管理员邮件已发送，用户邮件失败不返回错误
     }
@@ -227,6 +278,7 @@ Changning District, Shanghai, China 〒200050
     return res.status(200).json({
       success: true,
       message: 'Email sent successfully via Aliyun SMTP',
+      config: successConfig.name,
     });
     
   } catch (error: any) {
