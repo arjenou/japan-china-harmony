@@ -234,6 +234,9 @@ const translations: Record<Language, any> = {
       mapTitle: '上海英物国际贸易有限公司 地图',
       successTitle: '已收到您的咨询',
       successMessage: '我们的工作人员会尽快与您联系。',
+      errorTitle: '发送失败',
+      errorMessage: '发送邮件时出现错误，请稍后重试。',
+      sending: '发送中...',
       required: '*',
     },
     footer: {
@@ -421,6 +424,9 @@ const translations: Record<Language, any> = {
       mapTitle: '上海英物国際貿易有限会社 地図',
       successTitle: 'お問い合わせを受け付けました',
       successMessage: '担当者より折り返しご連絡させていただきます。',
+      errorTitle: '送信失敗',
+      errorMessage: 'メール送信中にエラーが発生しました。後ほどお試しください。',
+      sending: '送信中...',
       required: '*',
     },
     footer: {
@@ -608,6 +614,9 @@ const translations: Record<Language, any> = {
       mapTitle: 'Shanghai Yingwu International Trading Co., Ltd. Map',
       successTitle: 'Contact received',
       successMessage: 'Our staff will contact you as soon as possible.',
+      errorTitle: 'Sending failed',
+      errorMessage: 'An error occurred while sending the email. Please try again later.',
+      sending: 'Sending...',
       required: '*',
     },
     footer: {

@@ -16,13 +16,46 @@ const Contact = () => {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: t('contact.successTitle'),
-      description: t('contact.successMessage'),
-    });
-    setFormData({ name: "", email: "", company: "", message: "" });
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        toast({
+          title: t('contact.successTitle'),
+          description: t('contact.successMessage'),
+        });
+        setFormData({ name: "", email: "", company: "", message: "" });
+      } else {
+        toast({
+          title: t('contact.errorTitle') || '发送失败',
+          description: data.error || t('contact.errorMessage') || '发送邮件时出现错误，请稍后重试',
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast({
+        title: t('contact.errorTitle') || '发送失败',
+        description: t('contact.errorMessage') || '发送邮件时出现错误，请稍后重试',
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -102,8 +135,9 @@ const Contact = () => {
                 <Button 
                   type="submit" 
                   className="w-full bg-primary hover:bg-primary-glow text-primary-foreground shadow-glow transition-smooth"
+                  disabled={isSubmitting}
                 >
-                  {t('contact.send')}
+                  {isSubmitting ? t('contact.sending') || '发送中...' : t('contact.send')}
                 </Button>
               </form>
             </div>

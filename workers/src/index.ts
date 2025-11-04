@@ -706,5 +706,136 @@ app.get('/api/images/:key{.+}', async (c) => {
   }
 });
 
+// 发送联系表单邮件
+app.post('/api/contact', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { name, email, company, message } = body;
+    
+    if (!name || !email || !message) {
+      return c.json({ error: 'Name, email, and message are required' }, 400);
+    }
+    
+    // 验证邮箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return c.json({ error: 'Invalid email format' }, 400);
+    }
+    
+    // 使用 MailChannels 发送邮件
+    const recipientEmail = 'eikoyang@mono-grp.com.cn';
+    
+    // 发送给管理员的邮件内容
+    const adminEmailContent = `
+      <h2>新的联系表单提交</h2>
+      <p><strong>姓名：</strong>${name}</p>
+      <p><strong>邮箱：</strong>${email}</p>
+      <p><strong>公司：</strong>${company || '未提供'}</p>
+      <p><strong>消息：</strong></p>
+      <p>${message.replace(/\n/g, '<br>')}</p>
+      <hr>
+      <p><small>此邮件来自英武实业网站联系表单</small></p>
+    `;
+    
+    // 发送给用户的自动回复邮件内容
+    const autoReplyContent = `
+      <h2>感谢您的咨询</h2>
+      <p>尊敬的${name}，</p>
+      <p>我们已经收到您的咨询信息，我们会尽快与您联系。</p>
+      <p>以下是您提交的信息：</p>
+      <p><strong>公司：</strong>${company || '未提供'}</p>
+      <p><strong>消息：</strong></p>
+      <p>${message.replace(/\n/g, '<br>')}</p>
+      <hr>
+      <p>上海英武实业有限公司<br>
+      Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br>
+      Changning District, Shanghai, China 〒200050</p>
+      <p>如有紧急事宜，请直接致电我们。</p>
+    `;
+    
+    try {
+      // 发送邮件给管理员
+      const adminEmailResponse = await fetch('https://api.mailchannels.net/tx/v1/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [
+            {
+              to: [{ email: recipientEmail, name: '英武实业' }],
+              dkim_domain: 'mono-grp.com.cn',
+              dkim_selector: 'mailchannels',
+            },
+          ],
+          from: {
+            email: 'noreply@yingwu-website.workers.dev',
+            name: '英武实业网站',
+          },
+          reply_to: {
+            email: email,
+            name: name,
+          },
+          subject: `新的联系表单 - ${name}`,
+          content: [
+            {
+              type: 'text/html',
+              value: adminEmailContent,
+            },
+          ],
+        }),
+      });
+      
+      if (!adminEmailResponse.ok) {
+        console.error('Failed to send admin email:', await adminEmailResponse.text());
+      }
+      
+      // 发送自动回复给用户
+      const userEmailResponse = await fetch('https://api.mailchannels.net/tx/v1/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [
+            {
+              to: [{ email: email, name: name }],
+            },
+          ],
+          from: {
+            email: 'noreply@yingwu-website.workers.dev',
+            name: '上海英武实业有限公司',
+          },
+          subject: '感谢您的咨询 - 上海英武实业',
+          content: [
+            {
+              type: 'text/html',
+              value: autoReplyContent,
+            },
+          ],
+        }),
+      });
+      
+      if (!userEmailResponse.ok) {
+        console.error('Failed to send auto-reply email:', await userEmailResponse.text());
+      }
+      
+      return c.json({ 
+        success: true, 
+        message: 'Email sent successfully' 
+      });
+    } catch (emailError: any) {
+      console.error('Email sending error:', emailError);
+      return c.json({ 
+        error: 'Failed to send email', 
+        details: emailError.message 
+      }, 500);
+    }
+  } catch (error: any) {
+    console.error('Contact form error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 export default app;
 
