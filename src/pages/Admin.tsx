@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogIn, LogOut } from 'lucide-react';
 import { compressImages } from '@/lib/imageCompressor';
 
 const API_BASE_URL = 'https://img.mono-grp.com';
@@ -36,6 +36,12 @@ interface Product {
 }
 
 export default function Admin() {
+  // 登录状态
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -60,9 +66,56 @@ export default function Admin() {
   const [isCompressing, setIsCompressing] = useState(false);
   const [compressionProgress, setCompressionProgress] = useState({ current: 0, total: 0 });
 
+  // 检查登录状态
   useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory, currentPage]);
+    const loginStatus = localStorage.getItem('admin_logged_in');
+    if (loginStatus === 'true') {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchProducts();
+    }
+  }, [selectedCategory, currentPage, isLoggedIn]);
+
+  // 登录处理
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+
+    // 模拟一个短暂的加载过程
+    setTimeout(() => {
+      if (loginUsername === 'admin' && loginPassword === 'admin123') {
+        setIsLoggedIn(true);
+        localStorage.setItem('admin_logged_in', 'true');
+        toast({
+          title: '登录成功',
+          description: '欢迎回来，管理员！',
+        });
+        setLoginUsername('');
+        setLoginPassword('');
+      } else {
+        toast({
+          title: '登录失败',
+          description: '用户名或密码错误',
+          variant: 'destructive',
+        });
+      }
+      setIsLoggingIn(false);
+    }, 500);
+  };
+
+  // 登出处理
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('admin_logged_in');
+    toast({
+      title: '已登出',
+      description: '您已安全退出管理后台',
+    });
+  };
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -555,6 +608,70 @@ export default function Admin() {
     }
   };
 
+  // 如果未登录，显示登录界面
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <LogIn className="w-6 h-6 text-blue-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold">管理员登录</CardTitle>
+            <CardDescription>请输入您的管理员凭证</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">用户名</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="请输入用户名"
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  required
+                  autoComplete="username"
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">密码</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="请输入密码"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="w-full"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full gap-2"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    登录中...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4" />
+                    登录
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -564,13 +681,23 @@ export default function Admin() {
             <p className="text-gray-600 mt-2">管理您的商品库存和信息</p>
           </div>
           
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" />
-                添加商品
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              登出
+            </Button>
+          
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  添加商品
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingProduct ? '编辑商品' : '添加新商品'}</DialogTitle>
@@ -787,6 +914,7 @@ export default function Admin() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="mb-6 flex items-center justify-between">
