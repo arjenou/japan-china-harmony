@@ -734,7 +734,7 @@ app.post('/api/contact', async (c) => {
       <p><strong>消息：</strong></p>
       <p>${message.replace(/\n/g, '<br>')}</p>
       <hr>
-      <p><small>此邮件来自英武实业网站联系表单</small></p>
+      <p><small>此邮件来自英物国際貿易网站联系表单</small></p>
     `;
     
     // 发送给用户的自动回复邮件内容
@@ -747,7 +747,7 @@ app.post('/api/contact', async (c) => {
       <p><strong>消息：</strong></p>
       <p>${message.replace(/\n/g, '<br>')}</p>
       <hr>
-      <p>上海英武实业有限公司<br>
+      <p>上海英物国際貿易有限公司<br>
       Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br>
       Changning District, Shanghai, China 〒200050</p>
       <p>如有紧急事宜，请直接致电我们。</p>
@@ -763,14 +763,14 @@ app.post('/api/contact', async (c) => {
         body: JSON.stringify({
           personalizations: [
             {
-              to: [{ email: recipientEmail, name: '英武实业' }],
+              to: [{ email: recipientEmail, name: '英物国際貿易' }],
               dkim_domain: 'mono-grp.com.cn',
               dkim_selector: 'mailchannels',
             },
           ],
           from: {
             email: 'noreply@yingwu-website.workers.dev',
-            name: '英武实业网站',
+            name: '英物国際貿易网站',
           },
           reply_to: {
             email: email,
@@ -804,9 +804,9 @@ app.post('/api/contact', async (c) => {
           ],
           from: {
             email: 'noreply@yingwu-website.workers.dev',
-            name: '上海英武实业有限公司',
+            name: '上海英物国際貿易有限公司',
           },
-          subject: '感谢您的咨询 - 上海英武实业',
+          subject: '感谢您的咨询 - 上海英物国際貿易',
           content: [
             {
               type: 'text/html',

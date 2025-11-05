@@ -114,7 +114,7 @@ app.post('/send-email', async (req, res) => {
     const { to, subject, html, replyTo } = req.body;
     
     await transporter.sendMail({
-      from: '"英武实业网站" <postmaster@mono-grp.com.cn>',
+      from: '"英物国際貿易网站" <postmaster@mono-grp.com.cn>',
       to,
       subject,
       html,
@@ -153,7 +153,7 @@ const adminEmailContent = `
   <p><strong>消息：</strong></p>
   <p>${message.replace(/\n/g, '<br>')}</p>
   <hr>
-  <p><small>此邮件来自英武实业网站联系表单</small></p>
+  <p><small>此邮件来自英物国際貿易网站联系表单</small></p>
 `;
 ```
 
@@ -171,7 +171,7 @@ const autoReplyContent = `
   <p><strong>消息：</strong></p>
   <p>${message.replace(/\n/g, '<br>')}</p>
   <hr>
-  <p>上海英武实业有限公司<br>
+  <p>上海英物国際貿易有限公司<br>
   Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br>
   Changning District, Shanghai, China 〒200050</p>
   <p>如有紧急事宜，请直接致电我们。</p>
