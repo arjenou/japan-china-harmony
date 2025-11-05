@@ -36,7 +36,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const smtpUser = process.env.SMTP_USER || 'eikoyang@mono-grp.com.cn';
-    const smtpPassword = process.env.SMTP_PASSWORD || 'Yang1234&';
+    const smtpPassword = process.env.SMTP_PASSWORD || '7a7Q33fO5QM3xMfy';
     const recipientEmail = 'eikoyang@mono-grp.com.cn';
 
     // 尝试多种 SMTP 配置
@@ -152,7 +152,7 @@ export default async function handler(req: any, res: any) {
       </div>
     </div>
     <div class="footer">
-      <p>此邮件来自英武实业网站联系表单</p>
+      <p>此邮件来自上海英物国際貿易有限会社网站联系表单</p>
       <p>请尽快回复客户咨询</p>
     </div>
   </div>
@@ -190,7 +190,7 @@ export default async function handler(req: any, res: any) {
       <p style="white-space: pre-wrap; background: white; padding: 10px; border-radius: 3px;">${escapeHtml(message)}</p>
       
       <div class="company-info">
-        <h3 style="margin-top: 0;">上海英武实业有限公司</h3>
+        <h3 style="margin-top: 0;">上海英物国際貿易有限会社</h3>
         <p><strong>地址：</strong>Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br>
         Changning District, Shanghai, China 〒200050</p>
         <p><strong>电话：</strong>013661548592</p>
@@ -201,7 +201,7 @@ export default async function handler(req: any, res: any) {
     </div>
     <div class="footer">
       <p>此邮件为自动发送，请勿直接回复</p>
-      <p>© 2024 上海英武实业有限公司 版权所有</p>
+      <p>© 2024 上海英物国際貿易有限会社 版权所有</p>
     </div>
   </div>
 </body>
@@ -212,7 +212,7 @@ export default async function handler(req: any, res: any) {
     console.log('Sending email to admin...');
     try {
       const adminInfo = await transporter.sendMail({
-        from: `"英武实业网站" <${smtpUser}>`,
+        from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
         to: recipientEmail,
         replyTo: email,
         subject: `新的联系表单 - ${name}`,
@@ -227,7 +227,7 @@ export default async function handler(req: any, res: any) {
 ${message}
 
 ---
-此邮件来自英武实业网站联系表单
+此邮件来自上海英物国際貿易有限会社网站联系表单
         `,
       });
       console.log('Admin email sent:', adminInfo.messageId);
@@ -243,9 +243,9 @@ ${message}
     console.log('Sending auto-reply to user...');
     try {
       const userInfo = await transporter.sendMail({
-        from: `"上海英武实业有限公司" <${smtpUser}>`,
+        from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
         to: email,
-        subject: '感谢您的咨询 - 上海英武实业',
+        subject: '感谢您的咨询 - 上海英物国際貿易有限会社',
         html: autoReplyHtml,
         text: `
 感谢您的咨询
@@ -260,7 +260,7 @@ ${message}
 ${message}
 
 ---
-上海英武实业有限公司
+上海英物国際貿易有限会社
 Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,
 Changning District, Shanghai, China 〒200050
 电话：013661548592
