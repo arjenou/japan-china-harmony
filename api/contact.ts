@@ -123,6 +123,7 @@ function getUserAutoReplyTemplate(name: string, company: string, message: string
       addressLabel: '地址：',
       phoneLabel: '电话：',
       emailLabel: '邮箱：',
+      websiteLabel: '网站：',
       message2: '如有紧急事宜，请直接致电我们或回复此邮件。',
       footer1: '此邮件为自动发送，请勿直接回复',
       footer2: '© 2024 上海英物国際貿易有限会社 版权所有',
@@ -140,6 +141,7 @@ function getUserAutoReplyTemplate(name: string, company: string, message: string
       addressLabel: '住所：',
       phoneLabel: '電話：',
       emailLabel: 'メール：',
+      websiteLabel: 'ウェブサイト：',
       message2: '緊急の場合は、お電話またはこのメールに直接ご返信ください。',
       footer1: 'このメールは自動送信されています',
       footer2: '© 2024 上海英物国際貿易有限会社 All Rights Reserved',
@@ -183,6 +185,7 @@ function getUserAutoReplyTemplate(name: string, company: string, message: string
         Changning District, Shanghai, China 〒200050</p>
         <p><strong>${t.phoneLabel}</strong>013661548592</p>
         <p><strong>${t.emailLabel}</strong>eikoyang@mono-grp.com.cn</p>
+        <p><strong>${t.websiteLabel}</strong><a href="https://www.mono-grp.com/" style="color: #667eea; text-decoration: none;">https://www.mono-grp.com/</a></p>
       </div>
       
       <p>${t.message2}</p>
@@ -214,6 +217,7 @@ Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,
 Changning District, Shanghai, China 〒200050
 ${t.phoneLabel}013661548592
 ${t.emailLabel}eikoyang@mono-grp.com.cn
+${t.websiteLabel}https://www.mono-grp.com/
 
 ${t.message2}
   `;
