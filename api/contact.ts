@@ -90,7 +90,7 @@ function getAdminEmailTemplate(name: string, email: string, company: string, mes
   </div>
 </body>
 </html>
-  `;
+    `;
 
   const text = `
 ${t.title}
@@ -194,7 +194,7 @@ function getUserAutoReplyTemplate(name: string, company: string, message: string
   </div>
 </body>
 </html>
-  `;
+    `;
 
   const text = `
 ${t.title}
@@ -259,122 +259,86 @@ export default async function handler(req: any, res: any) {
     const smtpPassword = process.env.SMTP_PASSWORD || '7a7Q33fO5QM3xMfy';
     const recipientEmail = process.env.RECIPIENT_EMAIL || 'eikoyang@mono-grp.com.cn';
 
-    // 尝试多种 SMTP 配置
-    const smtpConfigs = [
-      {
-        name: 'smtp.qiye.aliyun.com:465 (SSL)',
-        host: 'smtp.qiye.aliyun.com',
-        port: 465,
-        secure: true,
+    // 使用优先的 SMTP 配置（通常第一个就成功）
+    const smtpConfig = {
+      name: 'smtp.qiye.aliyun.com:465 (SSL)',
+      host: 'smtp.qiye.aliyun.com',
+      port: 465,
+      secure: true,
+    };
+
+    console.log(`Using ${smtpConfig.name} for sending emails`);
+
+    // 创建 SMTP 传输器（不预先验证，直接发送以节省时间）
+    const transporter = nodemailer.createTransport({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      secure: smtpConfig.secure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPassword,
       },
-      {
-        name: 'smtp.mxhichina.com:465 (SSL)',
-        host: 'smtp.mxhichina.com',
-        port: 465,
-        secure: true,
+      tls: {
+        rejectUnauthorized: false,
       },
-      {
-        name: 'smtp.qiye.aliyun.com:25 (TLS)',
-        host: 'smtp.qiye.aliyun.com',
-        port: 25,
-        secure: false,
-      },
-      {
-        name: 'smtp.mxhichina.com:25 (TLS)',
-        host: 'smtp.mxhichina.com',
-        port: 25,
-        secure: false,
-      },
-    ];
-
-    let transporter = null;
-    let successConfig = null;
-
-    // 尝试每个配置
-    for (const config of smtpConfigs) {
-      try {
-        console.log(`Trying ${config.name}...`);
-        
-        const testTransporter = nodemailer.createTransport({
-          host: config.host,
-          port: config.port,
-          secure: config.secure,
-          auth: {
-            user: smtpUser,
-            pass: smtpPassword,
-          },
-          tls: {
-            rejectUnauthorized: false, // 允许自签名证书
-          },
-        });
-
-        await testTransporter.verify();
-        console.log(`✓ ${config.name} verified successfully`);
-        
-        transporter = testTransporter;
-        successConfig = config;
-        break; // 找到可用配置，退出循环
-      } catch (error: any) {
-        console.error(`✗ ${config.name} failed:`, error.message);
-        continue; // 尝试下一个配置
-      }
-    }
-
-    // 如果所有配置都失败
-    if (!transporter || !successConfig) {
-      return res.status(500).json({
-        error: 'SMTP configuration failed',
-        details: 'All SMTP configurations failed. Please check your credentials or consider using Resend.',
-        suggestion: 'You may need to enable SMTP service or get an authorization code from Aliyun mail settings.',
-      });
-    }
-
-    console.log(`Using ${successConfig.name} for sending emails`);
+      pool: true, // 使用连接池
+      maxConnections: 5, // 最大并发连接数
+      maxMessages: 100, // 每个连接最多发送100条消息
+    });
 
     // 生成邮件模板
     const adminEmail = getAdminEmailTemplate(name, email, company, message, language);
     const userEmail = getUserAutoReplyTemplate(name, company, message, language);
 
-    // 发送给管理员的邮件
-    console.log('Sending email to admin...');
+    // 并行发送两封邮件以加快速度
+    console.log('Sending emails in parallel...');
+    
+    const sendAdminEmail = transporter.sendMail({
+      from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
+      to: recipientEmail,
+      replyTo: email,
+      subject: adminEmail.subject,
+      html: adminEmail.html,
+      text: adminEmail.text,
+    });
+
+    const sendUserEmail = transporter.sendMail({
+      from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
+      to: email,
+      subject: userEmail.subject,
+      html: userEmail.html,
+      text: userEmail.text,
+    });
+
     try {
-      const adminInfo = await transporter.sendMail({
-        from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
-        to: recipientEmail,
-        replyTo: email,
-        subject: adminEmail.subject,
-        html: adminEmail.html,
-        text: adminEmail.text,
-      });
-      console.log('Admin email sent:', adminInfo.messageId);
+      // 同时发送两封邮件
+      const [adminInfo, userInfo] = await Promise.all([sendAdminEmail, sendUserEmail]);
+      console.log('Both emails sent successfully');
+      console.log('Admin email:', adminInfo.messageId);
+      console.log('User email:', userInfo.messageId);
     } catch (error: any) {
-      console.error('Failed to send admin email:', error);
-      return res.status(500).json({
-        error: 'Failed to send admin email',
-        details: error.message,
-      });
+      console.error('Failed to send emails:', error);
+      
+      // 尝试至少发送管理员邮件
+      try {
+        const adminInfo = await sendAdminEmail;
+        console.log('Admin email sent (fallback):', adminInfo.messageId);
+        // 管理员邮件成功，用户邮件失败也返回成功
+      } catch (adminError: any) {
+        return res.status(500).json({
+          error: 'Failed to send email',
+          details: adminError.message,
+        });
+      }
     }
 
-    // 发送自动回复给用户
-    console.log('Sending auto-reply to user...');
-    try {
-      const userInfo = await transporter.sendMail({
-        from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
-        to: email,
-        subject: userEmail.subject,
-        html: userEmail.html,
-        text: userEmail.text,
-      });
-      console.log('User email sent:', userInfo.messageId);
-    } catch (error: any) {
-      console.error('Failed to send user email:', error);
-      // 管理员邮件已发送，用户邮件失败不返回错误
-    }
+    // 关闭传输器连接池（可选，让 Vercel 函数更快结束）
+    transporter.close();
 
     return res.status(200).json({
       success: true,
       message: 'Email sent successfully via Aliyun SMTP',
-      config: successConfig.name,
+      config: smtpConfig.name,
       language: language,
     });
     
