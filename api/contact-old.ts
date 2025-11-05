@@ -1,5 +1,4 @@
 // Vercel Serverless Function - 使用阿里云企业邮箱 SMTP 发送邮件
-// 支持中日双语邮件
 import nodemailer from 'nodemailer';
 
 // HTML 转义函数，防止 XSS
@@ -257,7 +256,7 @@ export default async function handler(req: any, res: any) {
 
     const smtpUser = process.env.SMTP_USER || 'eikoyang@mono-grp.com.cn';
     const smtpPassword = process.env.SMTP_PASSWORD || '7a7Q33fO5QM3xMfy';
-    const recipientEmail = process.env.RECIPIENT_EMAIL || 'eikoyang@mono-grp.com.cn';
+    const recipientEmail = 'eikoyang@mono-grp.com.cn';
 
     // 尝试多种 SMTP 配置
     const smtpConfigs = [
@@ -335,6 +334,103 @@ export default async function handler(req: any, res: any) {
     const adminEmail = getAdminEmailTemplate(name, email, company, message, language);
     const userEmail = getUserAutoReplyTemplate(name, company, message, language);
 
+    // 旧模板代码已移除 - 现在使用上面的函数生成
+    const adminEmailHtml_OLD = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+    .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; }
+    .field { margin: 15px 0; }
+    .label { font-weight: bold; color: #667eea; }
+    .value { margin-top: 5px; padding: 10px; background: white; border-radius: 3px; }
+    .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2 style="margin: 0;">新的联系表单提交</h2>
+    </div>
+    <div class="content">
+      <div class="field">
+        <div class="label">姓名：</div>
+        <div class="value">${escapeHtml(name)}</div>
+      </div>
+      <div class="field">
+        <div class="label">邮箱：</div>
+        <div class="value">${escapeHtml(email)}</div>
+      </div>
+      <div class="field">
+        <div class="label">公司：</div>
+        <div class="value">${escapeHtml(company || '未提供')}</div>
+      </div>
+      <div class="field">
+        <div class="label">消息内容：</div>
+        <div class="value" style="white-space: pre-wrap;">${escapeHtml(message)}</div>
+      </div>
+    </div>
+    <div class="footer">
+      <p>此邮件来自上海英物国際貿易有限会社网站联系表单</p>
+      <p>请尽快回复客户咨询</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    // 用户自动回复邮件内容（HTML）
+    const autoReplyHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+    .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; }
+    .company-info { margin-top: 20px; padding: 15px; background: white; border-left: 4px solid #667eea; }
+    .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2 style="margin: 0;">感谢您的咨询</h2>
+    </div>
+    <div class="content">
+      <p>尊敬的 ${escapeHtml(name)}，</p>
+      <p>感谢您通过我们的网站与我们联系。我们已经收到您的咨询信息，我们的工作人员会尽快与您取得联系。</p>
+      
+      <h3>您提交的信息：</h3>
+      <p><strong>公司：</strong>${escapeHtml(company || '未提供')}</p>
+      <p><strong>消息内容：</strong></p>
+      <p style="white-space: pre-wrap; background: white; padding: 10px; border-radius: 3px;">${escapeHtml(message)}</p>
+      
+      <div class="company-info">
+        <h3 style="margin-top: 0;">上海英物国際貿易有限会社</h3>
+        <p><strong>地址：</strong>Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,<br>
+        Changning District, Shanghai, China 〒200050</p>
+        <p><strong>电话：</strong>013661548592</p>
+        <p><strong>邮箱：</strong>eikoyang@mono-grp.com.cn</p>
+      </div>
+      
+      <p>如有紧急事宜，请直接致电我们或回复此邮件。</p>
+    </div>
+    <div class="footer">
+      <p>此邮件为自动发送，请勿直接回复</p>
+      <p>© 2024 上海英物国際貿易有限会社 版权所有</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
     // 发送给管理员的邮件
     console.log('Sending email to admin...');
     try {
@@ -342,9 +438,20 @@ export default async function handler(req: any, res: any) {
         from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
         to: recipientEmail,
         replyTo: email,
-        subject: adminEmail.subject,
-        html: adminEmail.html,
-        text: adminEmail.text,
+        subject: `新的联系表单 - ${name}`,
+        html: adminEmailHtml,
+        text: `
+新的联系表单提交
+
+姓名：${name}
+邮箱：${email}
+公司：${company || '未提供'}
+消息：
+${message}
+
+---
+此邮件来自上海英物国際貿易有限会社网站联系表单
+        `,
       });
       console.log('Admin email sent:', adminInfo.messageId);
     } catch (error: any) {
@@ -361,9 +468,29 @@ export default async function handler(req: any, res: any) {
       const userInfo = await transporter.sendMail({
         from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
         to: email,
-        subject: userEmail.subject,
-        html: userEmail.html,
-        text: userEmail.text,
+        subject: '感谢您的咨询 - 上海英物国際貿易有限会社',
+        html: autoReplyHtml,
+        text: `
+感谢您的咨询
+
+尊敬的${name}，
+
+感谢您通过我们的网站与我们联系。我们已经收到您的咨询信息，我们的工作人员会尽快与您取得联系。
+
+您提交的信息：
+公司：${company || '未提供'}
+消息：
+${message}
+
+---
+上海英物国際貿易有限会社
+Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,
+Changning District, Shanghai, China 〒200050
+电话：013661548592
+邮箱：eikoyang@mono-grp.com.cn
+
+如有紧急事宜，请直接致电我们或回复此邮件。
+        `,
       });
       console.log('User email sent:', userInfo.messageId);
     } catch (error: any) {
@@ -375,7 +502,6 @@ export default async function handler(req: any, res: any) {
       success: true,
       message: 'Email sent successfully via Aliyun SMTP',
       config: successConfig.name,
-      language: language,
     });
     
   } catch (error: any) {
@@ -387,3 +513,15 @@ export default async function handler(req: any, res: any) {
   }
 }
 
+// HTML 转义函数，防止 XSS
+function escapeHtml(text: string): string {
+  if (!text) return '';
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
