@@ -25,7 +25,7 @@ function getAdminEmailTemplate(name: string, email: string, company: string, mes
       emailLabel: '邮箱：',
       companyLabel: '公司：',
       messageLabel: '消息内容：',
-      footer1: '此邮件来自上海英物国際貿易有限会社网站联系表单',
+      footer1: '此邮件来自MONO-GRP Trading Co., Ltd. 网站联系表单',
       footer2: '请尽快回复客户咨询',
       notProvided: '未提供'
     },
@@ -36,7 +36,7 @@ function getAdminEmailTemplate(name: string, email: string, company: string, mes
       emailLabel: 'メールアドレス：',
       companyLabel: '会社名：',
       messageLabel: 'お問い合わせ内容：',
-      footer1: 'このメールは上海英物国際貿易有限会社のウェブサイトからのお問い合わせです',
+      footer1: 'このメールはMONO-GRP Trading Co., Ltd. のウェブサイトからのお問い合わせです',
       footer2: 'お早めにご返信ください',
       notProvided: '未記入'
     }
@@ -112,39 +112,39 @@ ${t.footer1}
 function getUserAutoReplyTemplate(name: string, company: string, message: string, language: string) {
   const templates = {
     zh: {
-      subject: '感谢您的咨询 - 上海英物国際貿易有限会社',
+      subject: '感谢您的咨询 - MONO-GRP Trading Co., Ltd. ',
       title: '感谢您的咨询',
       greeting: `尊敬的 ${escapeHtml(name)}，`,
       message1: '感谢您通过我们的网站与我们联系。我们已经收到您的咨询信息，我们的工作人员会尽快与您取得联系。',
       submittedInfo: '您提交的信息：',
       companyLabel: '公司：',
       messageLabel: '消息内容：',
-      companyName: '上海英物国際貿易有限会社',
+      companyName: 'MONO-GRP Trading Co., Ltd. ',
       addressLabel: '地址：',
       phoneLabel: '电话：',
       emailLabel: '邮箱：',
       websiteLabel: '网站：',
       message2: '如有紧急事宜，请直接致电我们或回复此邮件。',
       footer1: '此邮件为自动发送，请勿直接回复',
-      footer2: '© 2024 上海英物国際貿易有限会社 版权所有',
+      footer2: '© 2024 MONO-GRP Trading Co., Ltd.  版权所有',
       notProvided: '未提供'
     },
     ja: {
-      subject: 'お問い合わせありがとうございます - 上海英物国際貿易有限会社',
+      subject: 'お問い合わせありがとうございます - MONO-GRP Trading Co., Ltd. ',
       title: 'お問い合わせありがとうございます',
       greeting: `${escapeHtml(name)} 様`,
       message1: 'この度は当社ウェブサイトからお問い合わせいただきありがとうございます。お問い合わせ内容を受け付けました。担当者より折り返しご連絡させていただきます。',
       submittedInfo: 'ご送信いただいた内容：',
       companyLabel: '会社名：',
       messageLabel: 'お問い合わせ内容：',
-      companyName: '上海英物国際貿易有限会社',
+      companyName: 'MONO-GRP Trading Co., Ltd. ',
       addressLabel: '住所：',
       phoneLabel: '電話：',
       emailLabel: 'メール：',
       websiteLabel: 'ウェブサイト：',
       message2: '緊急の場合は、お電話またはこのメールに直接ご返信ください。',
       footer1: 'このメールは自動送信されています',
-      footer2: '© 2024 上海英物国際貿易有限会社 All Rights Reserved',
+      footer2: '© 2024 MONO-GRP Trading Co., Ltd.  All Rights Reserved',
       notProvided: '未記入'
     }
   };
@@ -298,7 +298,7 @@ export default async function handler(req: any, res: any) {
     console.log('Sending emails in parallel...');
     
     const sendAdminEmail = transporter.sendMail({
-      from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
+      from: `"MONO-GRP Trading Co., Ltd. " <${smtpUser}>`,
       to: recipientEmail,
       replyTo: email,
       subject: adminEmail.subject,
@@ -307,7 +307,7 @@ export default async function handler(req: any, res: any) {
     });
 
     const sendUserEmail = transporter.sendMail({
-      from: `"上海英物国際貿易有限会社" <${smtpUser}>`,
+      from: `"MONO-GRP Trading Co., Ltd. " <${smtpUser}>`,
       to: email,
       subject: userEmail.subject,
       html: userEmail.html,
