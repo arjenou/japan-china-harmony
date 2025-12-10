@@ -438,20 +438,9 @@ export default async function handler(req: any, res: any) {
         from: `"MONO-GRP Trading Co., Ltd. " <${smtpUser}>`,
         to: recipientEmail,
         replyTo: email,
-        subject: `新的联系表单 - ${name}`,
-        html: adminEmailHtml,
-        text: `
-新的联系表单提交
-
-姓名：${name}
-邮箱：${email}
-公司：${company || '未提供'}
-消息：
-${message}
-
----
-此邮件来自MONO-GRP Trading Co., Ltd. 网站联系表单
-        `,
+        subject: adminEmail.subject,
+        html: adminEmail.html,
+        text: adminEmail.text,
       });
       console.log('Admin email sent:', adminInfo.messageId);
     } catch (error: any) {
@@ -468,29 +457,9 @@ ${message}
       const userInfo = await transporter.sendMail({
         from: `"MONO-GRP Trading Co., Ltd. " <${smtpUser}>`,
         to: email,
-        subject: '感谢您的咨询 - MONO-GRP Trading Co., Ltd. ',
-        html: autoReplyHtml,
-        text: `
-感谢您的咨询
-
-尊敬的${name}，
-
-感谢您通过我们的网站与我们联系。我们已经收到您的咨询信息，我们的工作人员会尽快与您取得联系。
-
-您提交的信息：
-公司：${company || '未提供'}
-消息：
-${message}
-
----
-MONO-GRP Trading Co., Ltd. 
-Office I, 15/F, Huamin Hanjun Tower, 726 Yan'an West Road,
-Changning District, Shanghai, China 〒200050
-电话：013661548592
-邮箱：eikoyang@mono-grp.com.cn
-
-如有紧急事宜，请直接致电我们或回复此邮件。
-        `,
+        subject: userEmail.subject,
+        html: userEmail.html,
+        text: userEmail.text,
       });
       console.log('User email sent:', userInfo.messageId);
     } catch (error: any) {
@@ -511,17 +480,4 @@ Changning District, Shanghai, China 〒200050
       details: error.message,
     });
   }
-}
-
-// HTML 转义函数，防止 XSS
-function escapeHtml(text: string): string {
-  if (!text) return '';
-  const map: { [key: string]: string } = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
 }
