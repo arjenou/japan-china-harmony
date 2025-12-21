@@ -101,6 +101,7 @@ const translations: Record<Language, any> = {
         employees: '260名',
         engineers: '25名',
         inspectors: '20名',
+        downloadHint: '*点击下载相关资料',
       },
       factory2: {
         name: '安徽工厂',
@@ -291,6 +292,7 @@ const translations: Record<Language, any> = {
         employees: '260名',
         engineers: '25名',
         inspectors: '20名',
+        downloadHint: '*クリックして関連資料をダウンロード',
       },
       factory2: {
         name: '安徽工場',
@@ -481,6 +483,7 @@ const translations: Record<Language, any> = {
         employees: '260 people',
         engineers: '25 people',
         inspectors: '20 people',
+        downloadHint: '*Click to download related materials',
       },
       factory2: {
         name: 'Anhui Factory',

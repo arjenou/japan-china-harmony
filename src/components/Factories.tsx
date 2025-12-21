@@ -12,6 +12,8 @@ const Factories = () => {
       employees: t('factories.factory1.employees'),
       engineers: t('factories.factory1.engineers'),
       inspectors: t('factories.factory1.inspectors'),
+      downloadHint: t('factories.factory1.downloadHint'),
+      pdfUrl: 'https://media.pasi.jp/雑貨工場（绿杰）紹介PPT.pdf',
     },
     {
       name: t('factories.factory2.name'),
@@ -26,6 +28,12 @@ const Factories = () => {
     "/factor/factor2.png"
   ];
 
+  const handleFactoryClick = (pdfUrl?: string) => {
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
+    }
+  };
+
   return (
     <section id="factories" className="py-20 gradient-subtle overflow-hidden">
       <div className="container mx-auto px-4">
@@ -38,12 +46,13 @@ const Factories = () => {
           {factories.map((factory, index) => (
             <div 
               key={index}
-              className="relative p-8 rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden"
+              className={`relative p-8 rounded-xl shadow-card hover:shadow-elegant transition-smooth border border-border overflow-hidden ${factory.pdfUrl ? 'cursor-pointer' : ''}`}
               style={{
                 backgroundImage: `url(${backgroundImages[index]})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
+              onClick={() => handleFactoryClick(factory.pdfUrl)}
             >
               {/* 蒙版层 */}
               <div className="absolute inset-0 bg-gradient-to-br from-gray-800/65 via-gray-700/60 to-gray-900/70" />
@@ -97,6 +106,15 @@ const Factories = () => {
                     </div>
                   )}
                 </div>
+
+                {/* 下载提示 */}
+                {factory.downloadHint && (
+                  <div className="mt-4 pt-4 border-t border-white/20">
+                    <p className="text-xs text-white/80 drop-shadow-md italic">
+                      {factory.downloadHint}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ))}
