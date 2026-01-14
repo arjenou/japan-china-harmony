@@ -72,9 +72,9 @@ const translations: Record<Language, any> = {
     hero: {
       title: 'MONO-GRP Trading Co., Ltd.',
       subtitle: '世界的"好东西"制造商',
-      description1: '在中国开展一站式制造与贸易业务。利用多年积累的优质工厂网络，从瑜伽服、功能性内衣、针织品、杂货到各种时尚配件的OEM/ODM，从小批量到大型量贩店批量灵活应对。',
-      description2: '我们在动漫相关商品制造方面拥有丰富的实绩，年开发100+以上商品。',
-      description3: '质量管理基于日企标准，可提供第三方检验服务。',
+      description1: '公司以拥有约30年生产实绩的自有工厂为基础，运营独立的贸易部门。融合多年积累的自有工厂技术实力与合作工厂网络，以箱包为主力产品，开展运动服、功能服、杂货、时尚小物等OEM/ODM业务。从小批量生产到大批量订单均可灵活应对，每年拥有100+以上的商品开发实绩。',
+      description2: '特别是在动漫相关商品制造方面拥有丰富经验，已取得BSCI、ISO9001、迪士尼认证等国际标准。可配合第三方检验，最大限度保证品质。',
+      description3: '为帮助客户实现理想的商品制作，我们不断提出新的创意方案，致力于提供让您满意的商品。',
       contact: '联系我们',
     },
     philosophy: {
@@ -263,9 +263,9 @@ const translations: Record<Language, any> = {
     hero: {
       title: 'MONO-GRP Trading Co., Ltd. ',
       subtitle: '世界の"いいモノ"を作りに',
-      description1: '中国では製造と貿易をワンストップで展開しております。長年にわたり培った優良工場ネットワークを活かし、ヨガウェア，機能性インナー，ニットウェア,雑貨・多種多様なファッション小物のOEM/ODMを、小ロットから大型量販店向けロットまで柔軟に対応しております。',
-      description2: '当社ではアニメ関連グッズの製造の実績がございます。年間100+アイテム以上の開発実績がございます。',
-      description3: '品質管理は日系企業基準に基づき、第三者による検品もご対応可能です。',
+      description1: '当社は、約30年の生産実績を持つ自社工場を基盤とし、独立した貿易部門を運営しています。長年培った自社工場の技術力と協力工場ネットワークを融合し、バッグを主力製品として、スポーツ服、機能服、雑貨、ファッション小物等のOEM/ODM事業を展開しています。小ロット生産から大量オーダーまで柔軟に対応し、毎年100+以上の商品開発実績をしております。',
+      description2: '特にアニメ関連グッズの製造において豊富な経験を有し、BSCI、ISO9001、ディズニー認証等の国際基準を取得しています。第三者検査への協力も可能で、品質を最大限に保証します。',
+      description3: 'お客様の求める理想の商品づくりをお手伝いするために、常に新しい発想をご提案することで、ご満足いただける商品をお届け致します。',
       contact: 'お問い合わせ',
     },
     philosophy: {
@@ -454,9 +454,9 @@ const translations: Record<Language, any> = {
     hero: {
       title: 'MONO-GRP Trading Co., Ltd.',
       subtitle: 'Creating the Best Products in the World',
-      description1: 'We provide one-stop manufacturing and trading services in China. Utilizing our excellent factory network accumulated over the years, we flexibly handle OEM/ODM for yoga wear, functional innerwear, knitwear, sundries, and various fashion accessories, from small lots to large-scale retail store orders.',
-      description2: 'We have extensive experience in manufacturing anime-related products, with an annual development record of over 100+ items.',
-      description3: 'Quality control is based on Japanese corporate standards, and third-party inspections are available.',
+      description1: 'Our company operates an independent trading division based on our own factory with approximately 30 years of production experience. By integrating the technical expertise of our own factory cultivated over many years with our partner factory network, we develop OEM/ODM business for bags as our main product, along with sportswear, functional clothing, sundries, and fashion accessories. We flexibly handle everything from small-lot production to large-volume orders, with an annual product development record of over 100+ items.',
+      description2: 'We have extensive experience particularly in the manufacture of anime-related products and have obtained international standards such as BSCI, ISO9001, and Disney certification. We can cooperate with third-party inspections to ensure maximum quality.',
+      description3: 'To help our customers create their ideal products, we constantly propose new ideas and are committed to delivering products that satisfy you.',
       contact: 'Contact Us',
     },
     philosophy: {
