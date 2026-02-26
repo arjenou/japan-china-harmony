@@ -93,7 +93,7 @@ const translations: Record<Language, any> = {
       },
     },
     factories: {
-      title: '協力工場ｘ工場情報',
+      title: '協力工場×工場情報',
       factory1: {
         name: '太仓工厂',
         location: '江苏省太仓市',
@@ -284,7 +284,7 @@ const translations: Record<Language, any> = {
       },
     },
     factories: {
-      title: '協力工場ｘ工場情報',
+      title: '協力工場×工場情報',
       factory1: {
         name: '太倉工場',
         location: '江蘇省太倉市',
@@ -475,7 +475,7 @@ const translations: Record<Language, any> = {
       },
     },
     factories: {
-      title: '協力工場ｘ工場情報',
+      title: '協力工場×工場情報',
       factory1: {
         name: 'Taicang Factory',
         location: 'Taicang, Jiangsu Province',
