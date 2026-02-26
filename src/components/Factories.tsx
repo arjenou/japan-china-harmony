@@ -37,7 +37,7 @@ const Factories = () => {
   return (
     <section id="factories" className="py-20 gradient-subtle overflow-hidden">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-normal font-sans text-center mb-4 text-foreground">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
           {t('factories.title')}
         </h2>
         <div className="w-20 h-1 gradient-accent mx-auto mb-12 rounded-full" />
