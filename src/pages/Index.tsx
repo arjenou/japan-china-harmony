@@ -38,11 +38,29 @@ const Index = () => {
     }
     
     // 检查是否需要滚动到产品区域（从产品详情页通过浏览器后退按钮返回）
-    // 注意：如果有 lastViewedProductId，让 Products 组件处理具体产品的滚动
-    // 这里只处理没有具体产品ID的情况（直接滚动到产品区域）
     const shouldScrollToProducts = sessionStorage.getItem('shouldScrollToProducts');
     const lastProductId = sessionStorage.getItem('lastViewedProductId');
-    
+
+    // 有具体商品 ID 时：在首帧绘制前跳到离开列表时的 scrollY，避免先看到页顶再滚下来
+    if (shouldScrollToProducts === 'true' && lastProductId) {
+      const savedY = sessionStorage.getItem('savedScrollPosition');
+      if (savedY !== null && savedY !== '') {
+        const y = parseInt(savedY, 10);
+        if (!Number.isNaN(y) && y >= 0) {
+          window.scrollTo(0, y);
+        }
+      } else {
+        const productsElement = document.getElementById('products');
+        if (productsElement) {
+          const offset = 80;
+          const offsetPosition =
+            productsElement.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo(0, Math.max(0, offsetPosition));
+        }
+      }
+    }
+
+    // 没有具体产品 ID 时：只滚到产品区块顶部
     if (shouldScrollToProducts === 'true' && !lastProductId) {
       // 如果没有具体产品ID，只滚动到产品区域顶部
       // 清除标记
@@ -65,7 +83,7 @@ const Index = () => {
         }, 300);
       });
     }
-    // 如果有 lastProductId，Products 组件会自己处理滚动到具体产品位置
+    // 有 lastProductId 时，Products 在数据就绪后再瞬时对齐到卡片位置（不再用 smooth 从页顶滚）
   }, []);
 
   return (

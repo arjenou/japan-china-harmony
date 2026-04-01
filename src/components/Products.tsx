@@ -28,6 +28,19 @@ import { type Product } from "@/data/products";
 const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
 
+/** Sidebar order; default selection is the first key (not "all"). */
+const PRODUCT_CATEGORY_KEYS = [
+  'bags',
+  'goods',
+  // 'yoga', // ヨガウェア — UI 非表示
+  // 'yogaTools', // ヨガ用具 — UI 非表示
+  'sports',
+  'functional',
+  // 'gloves', // 軍手と手袋 — UI 非表示
+  'anime',
+  'all',
+] as const;
+
 const Products = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -66,16 +79,27 @@ const Products = () => {
   });
   
   const [selectedCategory, setSelectedCategory] = useState(() => {
+    const defaultCategory = t(`products.categories.${PRODUCT_CATEGORY_KEYS[0]}`);
+    const returningFromDetail =
+      sessionStorage.getItem('shouldScrollToProducts') === 'true' &&
+      !!sessionStorage.getItem('lastViewedProductId');
     const stored = sessionStorage.getItem('productsState');
-    if (stored) {
+    if (returningFromDetail && stored) {
       try {
         const state = JSON.parse(stored);
-        return state.category || t('products.categories.all');
-      } catch (e) {
-        return t('products.categories.all');
+        if (state.category && typeof state.category === 'string') {
+          const allowed = PRODUCT_CATEGORY_KEYS.map((key) =>
+            t(`products.categories.${key}`)
+          );
+          if (allowed.includes(state.category)) {
+            return state.category;
+          }
+        }
+      } catch {
+        /* ignore */
       }
     }
-    return t('products.categories.all');
+    return defaultCategory;
   });
   
   const [currentPage, setCurrentPage] = useState(() => {
@@ -106,22 +130,14 @@ const Products = () => {
   
   const [shouldScrollToProduct, setShouldScrollToProduct] = useState(false);
   
-  const categories = [
-    t('products.categories.all'),
-    t('products.categories.bags'),
-    t('products.categories.goods'),
-    t('products.categories.yoga'),
-    t('products.categories.yogaTools'),
-    t('products.categories.sports'),
-    t('products.categories.functional'),
-    t('products.categories.gloves'),
-    t('products.categories.anime'),
-  ];
-  
-  // 当语言改变时，重置选中的分类为当前语言的"全部"（但不在恢复状态时执行）
+  const categories = PRODUCT_CATEGORY_KEYS.map((key) =>
+    t(`products.categories.${key}`)
+  );
+
+  // 当语言改变时，重置为当前语言下的第一个分类（但不在恢复状态时执行）
   useEffect(() => {
     if (!isRestoringState) {
-      setSelectedCategory(t('products.categories.all'));
+      setSelectedCategory(t(`products.categories.${PRODUCT_CATEGORY_KEYS[0]}`));
     }
   }, [language, isRestoringState]);
   
@@ -214,51 +230,42 @@ const Products = () => {
     if (lastProductId && shouldScroll === 'true' && !isLoading && products.length > 0 && !shouldScrollToProduct) {
       // 标记已处理
       setShouldScrollToProduct(true);
-      
-      // 使用 requestAnimationFrame 确保 DOM 已完全渲染
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          const productElement = document.getElementById(`product-${lastProductId}`);
-          if (productElement) {
-            // 计算产品元素的位置（考虑导航栏高度）
-            const offset = 100; // 导航栏高度 + 一些间距
-            const elementPosition = productElement.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - offset;
-            
-            // 滚动到产品位置
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth",
-            });
-            
-            // 添加高亮效果
-            productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'transition-all', 'duration-300');
-            
-            // 延迟清理高亮和存储
-            setTimeout(() => {
-              productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-              sessionStorage.removeItem('lastViewedProductId');
-              sessionStorage.removeItem('shouldScrollToProducts');
-              sessionStorage.removeItem('productsState');
-            }, 3000); // 延长高亮时间到3秒，让用户更清楚地看到
-          } else {
-            // 如果当前页面找不到产品（可能在不同页），滚动到产品区域
-            const productsSection = document.getElementById('products');
-            if (productsSection) {
-              const offset = 100;
-              const elementPosition = productsSection.getBoundingClientRect().top;
-              const offsetPosition = elementPosition + window.pageYOffset - offset;
-              window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth",
-              });
-            }
-            // 清理存储
+
+      const scrollToProduct = () => {
+        const productElement = document.getElementById(`product-${lastProductId}`);
+        if (productElement) {
+          const offset = 100;
+          const elementPosition = productElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          // 与 Index 中恢复的 scrollY 衔接：瞬时定位，避免从页顶 smooth 滚下来
+          window.scrollTo({ top: offsetPosition, behavior: 'auto' });
+
+          productElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'transition-all', 'duration-300');
+
+          setTimeout(() => {
+            productElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
             sessionStorage.removeItem('lastViewedProductId');
             sessionStorage.removeItem('shouldScrollToProducts');
             sessionStorage.removeItem('productsState');
+            sessionStorage.removeItem('savedScrollPosition');
+          }, 3000);
+        } else {
+          const productsSection = document.getElementById('products');
+          if (productsSection) {
+            const offset = 100;
+            const elementPosition = productsSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            window.scrollTo({ top: offsetPosition, behavior: 'auto' });
           }
-        }, 100);
+          sessionStorage.removeItem('lastViewedProductId');
+          sessionStorage.removeItem('shouldScrollToProducts');
+          sessionStorage.removeItem('productsState');
+          sessionStorage.removeItem('savedScrollPosition');
+        }
+      };
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollToProduct);
       });
     }
   }, [isLoading, products, shouldScrollToProduct]);
