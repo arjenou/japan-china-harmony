@@ -268,7 +268,9 @@ export default function Admin() {
           // 新建模式，关闭对话框
           setIsDialogOpen(false);
           resetForm();
-          fetchProducts();
+          // 写操作后必须刷新版本号，否则列表命中旧缓存 URL，看不到新商品
+          await getProductsVersion(true);
+          await fetchProducts();
         }
       } else {
         throw new Error(result.error || '操作失败');
