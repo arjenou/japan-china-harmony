@@ -34,6 +34,24 @@ app.get('/api/categories', async (c) => {
   return c.json({ categories });
 });
 
+/**
+ * 商品列表 CDN 缓存键（与前端 fetch 的 query 顺序一致：page → pageSize → category → search）。
+ * 避免因参数顺序不同导致 purge 删不到、同一条件出现多份缓存。
+ */
+function getProductsListCacheKey(requestUrl: string): string {
+  const u = new URL(requestUrl);
+  const page = u.searchParams.get('page') || '1';
+  const pageSize = u.searchParams.get('pageSize') || '12';
+  const category = u.searchParams.get('category') || '';
+  const search = u.searchParams.get('search') || '';
+  const canonical = new URL('/api/products', u.origin);
+  canonical.searchParams.set('page', page);
+  canonical.searchParams.set('pageSize', pageSize);
+  if (category) canonical.searchParams.set('category', category);
+  if (search) canonical.searchParams.set('search', search);
+  return canonical.toString();
+}
+
 // 获取所有商品（支持分页和搜索，带缓存）
 app.get('/api/products', async (c) => {
   const category = c.req.query('category');
@@ -41,8 +59,8 @@ app.get('/api/products', async (c) => {
   const page = parseInt(c.req.query('page') || '1');
   const pageSize = parseInt(c.req.query('pageSize') || '12');
   
-  // 生成缓存键
-  const cacheKey = new URL(c.req.url).toString();
+  // 生成缓存键（规范化，便于与 clearProductsCache 一致）
+  const cacheKey = getProductsListCacheKey(c.req.url);
   const cache = caches.default;
   
   // 尝试从缓存获取
@@ -219,54 +237,56 @@ app.get('/api/products/:id', async (c) => {
   }
 });
 
-// 辅助函数：清除商品相关缓存
+// 辅助函数：清除商品相关缓存（键格式必须与 getProductsListCacheKey 一致）
 async function clearProductsCache(c: any) {
   const cache = caches.default;
-  const baseUrl = new URL(c.req.url).origin;
-  
-  // 清除商品列表缓存（所有可能的分页和过滤组合）
-  const keys = [
-    `${baseUrl}/api/products`,
-    `${baseUrl}/api/products?page=1`,
-    `${baseUrl}/api/products?page=1&pageSize=12`,
-  ];
-  
-  // 清除多个页面的缓存（最多前10页）
+  const origin = new URL(c.req.url).origin;
+
+  const keys = new Set<string>();
+
+  const addKey = (parts: { page?: number; pageSize?: number; category?: string; search?: string }) => {
+    const u = new URL(origin + '/api/products');
+    u.searchParams.set('page', String(parts.page ?? 1));
+    u.searchParams.set('pageSize', String(parts.pageSize ?? 12));
+    if (parts.category) u.searchParams.set('category', parts.category);
+    if (parts.search) u.searchParams.set('search', parts.search);
+    keys.add(u.toString());
+  };
+
+  const pageSizes = [9, 12, 20, 36];
+
+  // 无分类：前 10 页 × 各 pageSize
   for (let page = 1; page <= 10; page++) {
-    keys.push(`${baseUrl}/api/products?page=${page}`);
-    keys.push(`${baseUrl}/api/products?page=${page}&pageSize=12`);
-    keys.push(`${baseUrl}/api/products?page=${page}&pageSize=9`);
-    keys.push(`${baseUrl}/api/products?page=${page}&pageSize=20`);
-  }
-  
-  // 清除所有分类的缓存（日文分类）
-  for (const category of categories) {
-    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
-    for (let page = 1; page <= 5; page++) {
-      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}`);
-      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}&pageSize=12`);
-      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}&pageSize=9`);
+    for (const ps of pageSizes) {
+      addKey({ page, pageSize: ps });
     }
   }
-  
-  // 也清除中文分类（Admin页面使用的）
+
+  // 日文分类（站点筛选）
+  for (const cat of categories) {
+    for (let page = 1; page <= 10; page++) {
+      for (const ps of pageSizes) {
+        addKey({ page, pageSize: ps, category: cat });
+      }
+    }
+  }
+
+  // 中文分类（与 Admin 历史数据兼容）
   const chineseCategories = [
-    '瑜伽服', '瑜伽器具', '运动休闲类', '功能性服装', 
+    '瑜伽服', '瑜伽器具', '运动休闲类', '功能性服装',
     '包类', '軍手と手袋', '雑貨類', 'アニメ類'
   ];
-  
-  for (const category of chineseCategories) {
-    keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}`);
-    for (let page = 1; page <= 5; page++) {
-      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}`);
-      keys.push(`${baseUrl}/api/products?category=${encodeURIComponent(category)}&page=${page}&pageSize=12`);
+  for (const cat of chineseCategories) {
+    for (let page = 1; page <= 10; page++) {
+      for (const ps of pageSizes) {
+        addKey({ page, pageSize: ps, category: cat });
+      }
     }
   }
-  
-  // 批量删除缓存
-  await Promise.all(keys.map(key => cache.delete(key)));
-  
-  console.log(`Cleared ${keys.length} cache keys`);
+
+  await Promise.all([...keys].map((key) => cache.delete(key)));
+
+  console.log(`Cleared ${keys.size} products list cache keys`);
 }
 
 // 图片文件大小限制（5MB）
