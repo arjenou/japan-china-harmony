@@ -514,19 +514,28 @@ app.put('/api/products/reorder', async (c) => {
 });
 
 // 删除单张图片
-app.delete('/api/products/:id/images/:imageUrl', async (c) => {
+// 注意：imageUrl 段可能包含 `/`（R2 中的对象 key 形如 `folder/filename`），
+// 必须显式使用 `{.+}` 让路由匹配多段路径，否则会 404 / 500。
+app.delete('/api/products/:id/images/:imageUrl{.+}', async (c) => {
   const id = c.req.param('id');
-  const imageUrl = decodeURIComponent(c.req.param('imageUrl'));
-  
+  const rawImageUrl = c.req.param('imageUrl');
+  const imageUrl = (() => {
+    try {
+      return decodeURIComponent(rawImageUrl);
+    } catch {
+      return rawImageUrl;
+    }
+  })();
+
   try {
     // 删除 R2 中的图片
     await c.env.BUCKET.delete(imageUrl);
-    
+
     // 删除数据库记录
     await c.env.DB.prepare(
       'DELETE FROM product_images WHERE product_id = ? AND image_url = ?'
     ).bind(id, imageUrl).run();
-    
+
     await bumpProductsVersion(c.env);
 
     return c.json({
