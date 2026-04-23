@@ -9,9 +9,9 @@ import Footer from "@/components/Footer";
 import { type Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cdnImageUrl } from "@/lib/utils";
+import { API_BASE_URL, getProductsVersion, withVersion } from "@/lib/productsApi";
 
-const API_BASE_URL = 'https://img.mono-grp.com';
-const IMAGE_BASE_URL = 'https://img.mono-grp.com';
+const IMAGE_BASE_URL = API_BASE_URL;
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -19,12 +19,17 @@ const ProductDetail = () => {
   const { t } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // 使用 React Query 获取产品详情（带缓存）
+  // queryKey 包含 version：写操作后版本变 → 自动 refetch
+  const { data: version } = useQuery({
+    queryKey: ['products', 'version'],
+    queryFn: () => getProductsVersion(),
+    staleTime: 30 * 1000,
+  });
+
   const { data: product, isLoading, error } = useQuery({
-    queryKey: ['product', id],
+    queryKey: ['product', id, version ?? 'initial'],
     queryFn: async () => {
-      // 移除强制刷新逻辑，允许使用HTTP缓存
-      const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
+      const response = await fetch(await withVersion(`${API_BASE_URL}/api/products/${id}`));
       
       if (!response.ok) {
         throw new Error('Failed to fetch product');

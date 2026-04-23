@@ -25,9 +25,9 @@ import {
 } from "@/components/ui/pagination";
 import { type Product } from "@/data/products";
 import { cdnImageUrl } from "@/lib/utils";
+import { API_BASE_URL, getProductsVersion, withVersion } from "@/lib/productsApi";
 
-const API_BASE_URL = 'https://img.mono-grp.com';
-const IMAGE_BASE_URL = 'https://img.mono-grp.com';
+const IMAGE_BASE_URL = API_BASE_URL;
 
 /** Sidebar order; default selection is the first key (not "all"). */
 const PRODUCT_CATEGORY_KEYS = [
@@ -157,9 +157,16 @@ const Products = () => {
     return () => clearTimeout(timer);
   }, [searchInput, isRestoringState]);
 
+  // 后台写操作会更新 version；此 query 变更 → 所有 ['products', ...] 自动 refetch
+  const { data: version } = useQuery({
+    queryKey: ['products', 'version'],
+    queryFn: () => getProductsVersion(),
+    staleTime: 30 * 1000,
+  });
+
   // 使用 React Query 获取产品数据（带缓存）
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', currentPage, itemsPerPage, selectedCategory, searchQuery],
+    queryKey: ['products', currentPage, itemsPerPage, selectedCategory, searchQuery, version ?? 'initial'],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -188,8 +195,8 @@ const Products = () => {
         params.append('search', searchQuery.trim());
       }
       
-      // 移除强制刷新逻辑，允许使用HTTP缓存
-      const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
+      const url = await withVersion(`${API_BASE_URL}/api/products?${params}`);
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch products');

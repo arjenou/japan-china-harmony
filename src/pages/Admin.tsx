@@ -10,9 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogIn, LogOut } from 'lucide-react';
 import { compressImages } from '@/lib/imageCompressor';
 import { cdnImageUrl } from '@/lib/utils';
+import { API_BASE_URL, getProductsVersion, withVersion } from '@/lib/productsApi';
 
-const API_BASE_URL = 'https://img.mono-grp.com';
-const IMAGE_BASE_URL = 'https://img.mono-grp.com';
+const IMAGE_BASE_URL = API_BASE_URL;
 
 const categories = [
   'バッグ類',
@@ -121,28 +121,16 @@ export default function Admin() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      // 构建查询参数
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
       params.append('pageSize', pageSize.toString());
-      
+
       if (selectedCategory && selectedCategory !== 'all') {
         params.append('category', selectedCategory);
       }
-      
-      // 添加时间戳参数强制绕过缓存
-      params.append('_t', Date.now().toString());
-      
-      const url = `${API_BASE_URL}/api/products?${params.toString()}`;
-      
-      const response = await fetch(url, {
-        // 强制不使用缓存
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        },
-      });
+
+      const url = await withVersion(`${API_BASE_URL}/api/products?${params.toString()}`);
+      const response = await fetch(url);
       const data = await response.json();
       
       setProducts(data.products || []);
@@ -247,16 +235,10 @@ export default function Admin() {
             fileInput.value = '';
           }
           
-          // 重新获取该产品的最新数据
+          // 写操作后刷新 version，让后续读请求使用新 URL → 拿到最新数据
+          await getProductsVersion(true);
           const updatedProductResponse = await fetch(
-            `${API_BASE_URL}/api/products/${editingProduct.id}?_t=${Date.now()}`,
-            {
-              cache: 'no-store',
-              headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-              },
-            }
+            await withVersion(`${API_BASE_URL}/api/products/${editingProduct.id}`),
           );
           
           if (updatedProductResponse.ok) {
@@ -316,15 +298,15 @@ export default function Admin() {
       const result = await response.json();
 
       if (response.ok) {
-        // 立即从本地状态中移除该产品，提供即时反馈
         setProducts(prevProducts => prevProducts.filter(p => p.id !== id));
-        
+
         toast({
           title: '成功',
           description: '商品删除成功',
         });
-        
-        // 后台重新获取数据，确保与服务器同步
+
+        // 写操作后必须刷新版本号，否则后续 fetchProducts 仍然命中旧 URL 的缓存
+        await getProductsVersion(true);
         fetchProducts();
       } else {
         throw new Error(result.error || '删除失败');
@@ -368,8 +350,8 @@ export default function Admin() {
           title: '成功',
           description: '图片删除成功',
         });
-        
-        // 后台刷新产品列表，确保与服务器同步
+
+        await getProductsVersion(true);
         fetchProducts();
       } else {
         throw new Error(result.error || '删除失败');
@@ -440,8 +422,8 @@ export default function Admin() {
         title: '成功',
         description: '图片顺序已更新',
       });
-      
-      // 后台刷新产品列表，确保与服务器同步
+
+      await getProductsVersion(true);
       fetchProducts();
     } catch (error: any) {
       // 恢复原状态
@@ -478,14 +460,7 @@ export default function Admin() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/products/${product.id}?_t=${Date.now()}`,
-        {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-          },
-        }
+        await withVersion(`${API_BASE_URL}/api/products/${product.id}`),
       );
       
       if (response.ok) {
@@ -592,8 +567,8 @@ export default function Admin() {
         title: '成功',
         description: `产品顺序已更新为 ${newOrder}`,
       });
-      
-      // 刷新产品列表以显示正确的顺序
+
+      await getProductsVersion(true);
       await fetchProducts();
     } catch (error: any) {
       toast({

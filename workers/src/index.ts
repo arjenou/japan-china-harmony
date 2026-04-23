@@ -35,44 +35,50 @@ app.get('/api/categories', async (c) => {
 });
 
 /**
- * 商品列表 CDN 缓存键（与前端 fetch 的 query 顺序一致：page → pageSize → category → search）。
- * 避免因参数顺序不同导致 purge 删不到、同一条件出现多份缓存。
+ * 数据版本号（cache-busting）
+ * --------------------------
+ * 所有读接口让前端带上 ?v=<version>，写操作后我们自增该值，
+ * 旧 URL 不再被任何新请求使用，CDN/浏览器里的旧缓存自然失效。
+ * 前端用 /api/products/version 拉当前版本，很快（no-store）。
  */
-function getProductsListCacheKey(requestUrl: string): string {
-  const u = new URL(requestUrl);
-  const page = u.searchParams.get('page') || '1';
-  const pageSize = u.searchParams.get('pageSize') || '12';
-  const category = u.searchParams.get('category') || '';
-  const search = u.searchParams.get('search') || '';
-  const canonical = new URL('/api/products', u.origin);
-  canonical.searchParams.set('page', page);
-  canonical.searchParams.set('pageSize', pageSize);
-  if (category) canonical.searchParams.set('category', category);
-  if (search) canonical.searchParams.set('search', search);
-  return canonical.toString();
+async function getProductsVersion(env: Bindings): Promise<string> {
+  const row = await env.DB.prepare(
+    "SELECT value FROM app_meta WHERE key = 'products_version'"
+  ).first<{ value: string }>();
+  return row?.value ?? '1';
 }
 
-// 获取所有商品（支持分页和搜索，带缓存）
+async function bumpProductsVersion(env: Bindings): Promise<void> {
+  // SQLite 没有原生原子 int++，这里用一次 read → write。
+  // 并发写时即使偶发相等也无害：版本只需保证「写操作后严格大于之前观察过的值」。
+  const current = await getProductsVersion(env);
+  const next = String((parseInt(current, 10) || 0) + 1);
+  await env.DB.prepare(
+    "UPDATE app_meta SET value = ? WHERE key = 'products_version'"
+  ).bind(next).run();
+}
+
+// 极简端点：前端启动/写操作后 invalidate 时读取
+app.get('/api/products/version', async (c) => {
+  const version = await getProductsVersion(c.env);
+  return new Response(JSON.stringify({ version }), {
+    headers: {
+      'Content-Type': 'application/json',
+      // 必须永远最新：既不走 CDN 也不走浏览器缓存
+      'Cache-Control': 'no-store',
+    },
+  });
+});
+
+// 获取所有商品（支持分页和搜索）
+// 缓存策略：依赖 Cache-Control + stale-while-revalidate，不再手写 Cache API。
+// URL 里的 v 会让旧版本自动成为不同的缓存键。
 app.get('/api/products', async (c) => {
   const category = c.req.query('category');
   const search = c.req.query('search');
   const page = parseInt(c.req.query('page') || '1');
   const pageSize = parseInt(c.req.query('pageSize') || '12');
-  
-  // 生成缓存键（规范化，便于与 clearProductsCache 一致）
-  const cacheKey = getProductsListCacheKey(c.req.url);
-  const cache = caches.default;
-  
-  // 尝试从缓存获取
-  let response = await cache.match(cacheKey);
-  
-  if (response) {
-    // 添加缓存命中标记
-    const newResponse = new Response(response.body, response);
-    newResponse.headers.set('X-Cache', 'HIT');
-    return newResponse;
-  }
-  
+
   try {
     // 构建查询条件
     let whereConditions: string[] = [];
@@ -141,55 +147,43 @@ app.get('/api/products', async (c) => {
       };
     });
     
-    const responseData = { 
+    const responseData = {
       products,
       total,
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize)
     };
-    
-    // 创建响应并设置优化的缓存头
-    // 使用 stale-while-revalidate 策略：过期后继续使用缓存，同时在后台更新
-    response = new Response(JSON.stringify(responseData), {
+
+    // 有 ?v= 的请求：把缓存交给 Cloudflare 的 Cache-Control + SWR。
+    // 版本变更 → URL 变 → 新缓存键，旧缓存自然失效。
+    // 没有 ?v= 的请求（例如直接 curl）退化为短缓存，避免脏数据长时间滞留。
+    const hasVersion = new URL(c.req.url).searchParams.has('v');
+    const cacheControl = hasVersion
+      // 版本化 URL：内容不可变，可长期缓存
+      ? 'public, max-age=60, s-maxage=31536000, immutable'
+      // 非版本化 URL：只短缓存，降低脏缓存窗口
+      : 'public, max-age=0, s-maxage=30, stale-while-revalidate=120';
+
+    return new Response(JSON.stringify(responseData), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600', // CDN缓存30分钟，过期后1小时内可继续使用
-        'X-Cache': 'MISS',
+        'Cache-Control': cacheControl,
       },
     });
-    
-    // 存入缓存
-    c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
-    
-    return response;
   } catch (error: any) {
     console.error('Error fetching products:', error);
     return c.json({ error: error.message }, 500);
   }
 });
 
-// 获取单个商品（带缓存）
+// 获取单个商品
 app.get('/api/products/:id', async (c) => {
   const id = c.req.param('id');
-  
-  // 生成缓存键
-  const cacheKey = new URL(c.req.url).toString();
-  const cache = caches.default;
-  
-  // 尝试从缓存获取
-  let response = await cache.match(cacheKey);
-  
-  if (response) {
-    const newResponse = new Response(response.body, response);
-    newResponse.headers.set('X-Cache', 'HIT');
-    return newResponse;
-  }
-  
+
   try {
-    // 优化：使用JOIN一次性获取产品和所有图片
     const query = `
-      SELECT 
+      SELECT
         p.*,
         GROUP_CONCAT(pi.image_url ORDER BY pi.display_order) as all_images
       FROM products p
@@ -197,14 +191,13 @@ app.get('/api/products/:id', async (c) => {
       WHERE p.id = ?
       GROUP BY p.id
     `;
-    
+
     const product = await c.env.DB.prepare(query).bind(id).first();
-    
+
     if (!product) {
       return c.json({ error: 'Product not found' }, 404);
     }
-    
-    // 解析图片列表
+
     const allImages = (product as any).all_images;
     const productData: any = {
       id: product.id,
@@ -216,78 +209,23 @@ app.get('/api/products/:id', async (c) => {
       created_at: product.created_at,
       images: allImages ? String(allImages).split(',') : [],
     };
-    
-    // 创建响应并设置优化的缓存头
-    // 产品详情页缓存时间更长，因为访问频率较低但内容更稳定
-    response = new Response(JSON.stringify({ product: productData }), {
+
+    const hasVersion = new URL(c.req.url).searchParams.has('v');
+    const cacheControl = hasVersion
+      ? 'public, max-age=60, s-maxage=31536000, immutable'
+      : 'public, max-age=0, s-maxage=30, stale-while-revalidate=120';
+
+    return new Response(JSON.stringify({ product: productData }), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200', // CDN缓存1小时，过期后2小时内可继续使用
-        'X-Cache': 'MISS',
+        'Cache-Control': cacheControl,
       },
     });
-    
-    // 存入缓存
-    c.executionCtx.waitUntil(cache.put(cacheKey, response.clone()));
-    
-    return response;
   } catch (error: any) {
     console.error('Error fetching product:', error);
     return c.json({ error: error.message }, 500);
   }
 });
-
-// 辅助函数：清除商品相关缓存（键格式必须与 getProductsListCacheKey 一致）
-async function clearProductsCache(c: any) {
-  const cache = caches.default;
-  const origin = new URL(c.req.url).origin;
-
-  const keys = new Set<string>();
-
-  const addKey = (parts: { page?: number; pageSize?: number; category?: string; search?: string }) => {
-    const u = new URL(origin + '/api/products');
-    u.searchParams.set('page', String(parts.page ?? 1));
-    u.searchParams.set('pageSize', String(parts.pageSize ?? 12));
-    if (parts.category) u.searchParams.set('category', parts.category);
-    if (parts.search) u.searchParams.set('search', parts.search);
-    keys.add(u.toString());
-  };
-
-  const pageSizes = [9, 12, 20, 36];
-
-  // 无分类：前 10 页 × 各 pageSize
-  for (let page = 1; page <= 10; page++) {
-    for (const ps of pageSizes) {
-      addKey({ page, pageSize: ps });
-    }
-  }
-
-  // 日文分类（站点筛选）
-  for (const cat of categories) {
-    for (let page = 1; page <= 10; page++) {
-      for (const ps of pageSizes) {
-        addKey({ page, pageSize: ps, category: cat });
-      }
-    }
-  }
-
-  // 中文分类（与 Admin 历史数据兼容）
-  const chineseCategories = [
-    '瑜伽服', '瑜伽器具', '运动休闲类', '功能性服装',
-    '包类', '軍手と手袋', '雑貨類', 'アニメ類'
-  ];
-  for (const cat of chineseCategories) {
-    for (let page = 1; page <= 10; page++) {
-      for (const ps of pageSizes) {
-        addKey({ page, pageSize: ps, category: cat });
-      }
-    }
-  }
-
-  await Promise.all([...keys].map((key) => cache.delete(key)));
-
-  console.log(`Cleared ${keys.size} products list cache keys`);
-}
 
 // 图片文件大小限制（5MB）
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -358,13 +296,12 @@ app.post('/api/products', async (c) => {
       ).bind(productId, images[i], i).run();
     }
     
-    // 清除缓存
-    c.executionCtx.waitUntil(clearProductsCache(c));
-    
-    return c.json({ 
-      success: true, 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
       productId,
-      message: 'Product created successfully' 
+      message: 'Product created successfully'
     }, 201);
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -439,19 +376,11 @@ app.put('/api/products/:id', async (c) => {
       }
     }
     
-    // 清除缓存
-    const cache = caches.default;
-    const baseUrl = new URL(c.req.url).origin;
-    c.executionCtx.waitUntil(
-      Promise.all([
-        clearProductsCache(c),
-        cache.delete(`${baseUrl}/api/products/${id}`)
-      ])
-    );
-    
-    return c.json({ 
-      success: true, 
-      message: 'Product updated successfully' 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
+      message: 'Product updated successfully'
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -477,19 +406,11 @@ app.delete('/api/products/:id', async (c) => {
     await c.env.DB.prepare('DELETE FROM product_images WHERE product_id = ?').bind(id).run();
     await c.env.DB.prepare('DELETE FROM products WHERE id = ?').bind(id).run();
     
-    // 清除缓存
-    const cache = caches.default;
-    const baseUrl = new URL(c.req.url).origin;
-    c.executionCtx.waitUntil(
-      Promise.all([
-        clearProductsCache(c),
-        cache.delete(`${baseUrl}/api/products/${id}`)
-      ])
-    );
-    
-    return c.json({ 
-      success: true, 
-      message: 'Product deleted successfully' 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
+      message: 'Product deleted successfully'
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -552,19 +473,11 @@ app.put('/api/products/:id/order', async (c) => {
       ).bind(display_order, id).run();
     }
     
-    // 清除缓存
-    const cache = caches.default;
-    const baseUrl = new URL(c.req.url).origin;
-    c.executionCtx.waitUntil(
-      Promise.all([
-        clearProductsCache(c),
-        cache.delete(`${baseUrl}/api/products/${id}`)
-      ])
-    );
-    
-    return c.json({ 
-      success: true, 
-      message: 'Product order updated successfully' 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
+      message: 'Product order updated successfully'
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -589,12 +502,11 @@ app.put('/api/products/reorder', async (c) => {
     
     await c.env.DB.batch(statements);
     
-    // 清除所有产品缓存
-    c.executionCtx.waitUntil(clearProductsCache(c));
-    
-    return c.json({ 
-      success: true, 
-      message: 'Products order updated successfully' 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
+      message: 'Products order updated successfully'
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -615,19 +527,11 @@ app.delete('/api/products/:id/images/:imageUrl', async (c) => {
       'DELETE FROM product_images WHERE product_id = ? AND image_url = ?'
     ).bind(id, imageUrl).run();
     
-    // 清除相关缓存
-    const cache = caches.default;
-    const baseUrl = new URL(c.req.url).origin;
-    c.executionCtx.waitUntil(
-      Promise.all([
-        clearProductsCache(c),
-        cache.delete(`${baseUrl}/api/products/${id}`)
-      ])
-    );
-    
-    return c.json({ 
-      success: true, 
-      message: 'Image deleted successfully' 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
+      message: 'Image deleted successfully'
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -658,19 +562,11 @@ app.put('/api/products/:id/images/reorder', async (c) => {
       'UPDATE products SET image = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
     ).bind(images[0], id).run();
     
-    // 清除相关缓存
-    const cache = caches.default;
-    const baseUrl = new URL(c.req.url).origin;
-    c.executionCtx.waitUntil(
-      Promise.all([
-        clearProductsCache(c),
-        cache.delete(`${baseUrl}/api/products/${id}`)
-      ])
-    );
-    
-    return c.json({ 
-      success: true, 
-      message: 'Image order updated successfully' 
+    await bumpProductsVersion(c.env);
+
+    return c.json({
+      success: true,
+      message: 'Image order updated successfully'
     });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);

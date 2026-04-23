@@ -26,6 +26,13 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_display_order ON products(display_order);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id);
 
+-- 单行 key/value 表：用于保存数据版本号（写操作自增，前端用作缓存 busting 参数）
+CREATE TABLE IF NOT EXISTS app_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+INSERT OR IGNORE INTO app_meta (key, value) VALUES ('products_version', '1');
+
 -- 插入初始分类数据（可选）
 -- 分类：瑜伽服、瑜伽器具、运动休闲类、功能性服装、包类、軍手と手袋、雑貨類、アニメ類
 
