@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Image as ImageIcon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogIn, LogOut } from 'lucide-react';
 import { compressImages } from '@/lib/imageCompressor';
+import { cdnImageUrl } from '@/lib/utils';
 
 const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
@@ -770,7 +771,7 @@ export default function Admin() {
                         <div key={index} className="relative group border rounded-lg p-2 bg-white hover:shadow-md transition-shadow">
                           <div className="w-full h-32 bg-secondary/30 rounded flex items-center justify-center mb-2">
                             <img
-                              src={`${IMAGE_BASE_URL}/api/images/${img}`}
+                              src={cdnImageUrl(IMAGE_BASE_URL, img)}
                               alt={`Product ${index + 1}`}
                               className="max-w-full max-h-full object-contain"
                             />
@@ -962,7 +963,7 @@ export default function Admin() {
                 <div className="aspect-video relative bg-gray-100 flex items-center justify-center">
                   {product.image ? (
                     <img
-                      src={`${IMAGE_BASE_URL}/api/images/${product.image}`}
+                      src={cdnImageUrl(IMAGE_BASE_URL, product.image)}
                       alt={product.name}
                       className="w-full h-full object-contain"
                     />

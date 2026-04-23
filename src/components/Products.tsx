@@ -24,6 +24,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { type Product } from "@/data/products";
+import { cdnImageUrl } from "@/lib/utils";
 
 const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
@@ -200,7 +201,7 @@ const Products = () => {
       const apiProducts: Product[] = data.products.map((p: any) => ({
         id: p.id,
         name: p.name,
-        image: `${IMAGE_BASE_URL}/api/images/${p.image}`,
+        image: cdnImageUrl(IMAGE_BASE_URL, p.image),
         category: p.category,
         folder: p.folder,
         images: p.images || [],

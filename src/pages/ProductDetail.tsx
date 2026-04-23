@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { type Product } from "@/data/products";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cdnImageUrl } from "@/lib/utils";
 
 const API_BASE_URL = 'https://img.mono-grp.com';
 const IMAGE_BASE_URL = 'https://img.mono-grp.com';
@@ -35,7 +36,7 @@ const ProductDetail = () => {
         const apiProduct: Product = {
           id: data.product.id,
           name: data.product.name,
-          image: `${IMAGE_BASE_URL}/api/images/${data.product.image}`,
+          image: cdnImageUrl(IMAGE_BASE_URL, data.product.image),
           category: data.product.category,
           folder: data.product.folder,
           images: data.product.images || [],
@@ -145,7 +146,7 @@ const ProductDetail = () => {
     );
   }
 
-  const currentImage = `${IMAGE_BASE_URL}/api/images/${product.images[currentImageIndex]}`;
+  const currentImage = cdnImageUrl(IMAGE_BASE_URL, product.images[currentImageIndex]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -214,7 +215,7 @@ const ProductDetail = () => {
                     }`}
                   >
                     <img
-                      src={`${IMAGE_BASE_URL}/api/images/${img}`}
+                      src={cdnImageUrl(IMAGE_BASE_URL, img)}
                       alt={`${product.name} ${index + 1}`}
                       loading="lazy"
                       className="w-full h-full object-contain"
