@@ -55,7 +55,7 @@ const Hero = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl bg-black/40 backdrop-blur-sm rounded-2xl p-6 md:p-8 lg:p-10">
           <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4 md:mb-6 animate-fade-in">
             {t('hero.title')}
           </h1>
