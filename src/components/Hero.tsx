@@ -37,8 +37,8 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/40 to-primary/20" />
       </div>
 
-      {/* Navigation Dots */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+      {/* Navigation Dots - desktop */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 hidden md:flex gap-2">
         {images.map((_, index) => (
           <button
             key={index}
@@ -78,6 +78,21 @@ const Hero = () => {
           >
             {t('hero.contact')}
           </Button>
+          {/* Navigation Dots - mobile */}
+          <div className="flex md:hidden gap-2 mt-4 justify-center">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? "bg-accent w-8"
+                    : "bg-white/50 hover:bg-white/75"
+                }`}
+                aria-label={`画像 ${index + 1} に切り替え`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
